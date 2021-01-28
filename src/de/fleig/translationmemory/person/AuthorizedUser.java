@@ -4,20 +4,28 @@ import de.fleig.translationmemory.application.Globals;
 import de.fleig.translationmemory.exception.DecryptionException;
 import de.fleig.translationmemory.exception.EncryptionException;
 import de.fleig.translationmemory.exception.FailedToCreateCipherException;
+import de.fleig.translationmemory.exception.LoginFailedException;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class AuthorizedUser extends User {
     private static final String DEFAULT_ADMINISTRATOR_EMAIL = "admin@admin.com"; // Hardcoded for first sign in.
     private static final String DEFAULT_TRANSLATOR_EMAIL = "translator@translator.com";
     private static final String DEFAULT_PASSWORD = "default_password";
 
-    private static final ArrayList<AuthorizedUser> registeredUsers = new ArrayList<>();
+    public static final Pattern VALID_EMAIL_ADDRESS_REGEX =
+            Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE); //https://stackoverflow.com/questions/8204680/java-regex-email
+
+
+    private static final HashMap<String, AuthorizedUser> registeredUsers = new HashMap<>();
 
     private String email;
     private String password;
@@ -25,21 +33,98 @@ public class AuthorizedUser extends User {
 
     /**
      * First check if a user is already registered, if so check if the password is correct,
-     * if that is true return a new instance of the user type.
+     * if that is true return the user.
      * If not registered and the default email is used, check for the correct default password,
      * after setting a new password and email return a instance of the user type.
      * <p></p>
-     * If the user cannot be identified throw a NoSuchUserException, after every fifth set a login timeout for
-     * a increasing amount of time. If the time reaches 3 Minutes terminate the program.
+     * Throws Exception if
+     * <ul>
+     *     <li>User is not already registered and does not use default email</li>
+     *     <li>Registered user with wrong password</li>
+     *     <li>Default email without default password</li>
+     * </ul>
      *
      * @return a new instance of the user type
+     * @throws LoginFailedException if the login fails because of a wrong email or password
      */
-    public AuthorizedUser login() {
-        return null;
+    public static AuthorizedUser login(String email, String password) throws LoginFailedException {
+        if(isUserAlreadyRegistered(email)) {
+            AuthorizedUser userToSignIn = registeredUsers.get(email);
+            if (isPasswordValidForUser(userToSignIn, password)) {
+                return userToSignIn;
+            } else {
+                throw new LoginFailedException();
+            }
+        } else if (isDefaultEmail(email) && isDefaultPassword(password)) {
+            AuthorizedUser newUser;
+            if (isDefaultAdministratorEmail(email)) {
+                newUser = createAdministrator();
+            } else {
+                newUser = createTranslator();
+            }
+            registeredUsers.put(newUser.getEmail(), newUser);
+            return newUser;
+        }
+        throw new LoginFailedException();
     }
 
-    public AuthorizedUser() {
+    /**
+     * Get the email and password from the user and return a new instance of translator or administrator
+     *
+     * @param isAdministrator indicates if the returned authorized user is an administrator or translator
+     * @return a new instance of administrator of translator
+     */
+    private static AuthorizedUser createNewAuthorizedUser(boolean isAdministrator) {
+        Scanner inputScanner = new Scanner(System.in);
+        String email;
+        String password;
+
+        Globals.printToConsole("Please enter a new email address");
+        String input = inputScanner.nextLine();
+        while (!isValidEmail(input)) {
+            Globals.printToConsole("Email not valid try again");
+            input = inputScanner.nextLine();
+        }
+        email = input;
+
+        Globals.printToConsole("Please enter a new password");
+        password = inputScanner.nextLine();
+
+        if (isAdministrator) {
+            return new Administrator(email, password);
+        } else {
+            return new Translator(email, password);
+        }
+    }
+
+    /**
+     * Create a new translator
+     *
+     * @return a new instance of translator
+     */
+    public static Translator createTranslator() {
+        return (Translator) createNewAuthorizedUser(false);
+    }
+
+    /**
+     * Create a new administrator
+     *
+     * @return a new instance of administrator
+     */
+    private static Administrator createAdministrator() {
+        return (Administrator) createNewAuthorizedUser(true);
+    }
+
+    /**
+     * Constructor of AuthorizedUser
+     *
+     * @param email email of the user
+     * @param password password of the user
+     */
+    public AuthorizedUser(String email, String password) {
         createAesKeyAndSetForAuthorizedUser();
+        this.email = email;
+        this.password = password;
     }
 
     /**
@@ -49,23 +134,21 @@ public class AuthorizedUser extends User {
      * @param emailOfLoginRequest the email of the login request
      * @return if there is a registered user with the given parameter as email
      */
-    private boolean isUserAlreadyRegistered (String emailOfLoginRequest) {
-        for (AuthorizedUser eachUser : registeredUsers) {
-            if (eachUser.email.equals(emailOfLoginRequest)) {
-                return true;
-            }
-        }
-        return false;
+    private static boolean isUserAlreadyRegistered(String emailOfLoginRequest) {
+        return registeredUsers.containsKey(emailOfLoginRequest);
     }
 
+    private static boolean isPasswordValidForUser(AuthorizedUser userToSignIn, String passwordOfLoginRequest) {
+        return userToSignIn.getPassword().equals(passwordOfLoginRequest);
+    }
     /**
      * Answer if the email of the login request is a default email.
      *
      * @param emailOfLoginRequest the email of the login request
      * @return if it is a default email
      */
-    private boolean isDefaultEmail (String emailOfLoginRequest) {
-        return emailOfLoginRequest.equals(getDefaultAdministratorEmail()) || email.equals(getDefaultTranslatorEmail());
+    private static boolean isDefaultEmail(String emailOfLoginRequest) {
+        return isDefaultAdministratorEmail(emailOfLoginRequest)|| isDefaultTranslatorEmail(emailOfLoginRequest);
     }
 
     /**
@@ -74,8 +157,8 @@ public class AuthorizedUser extends User {
      * @param emailOfLoginRequest the email of the login request
      * @return if the emailOfLoginRequest is the default administrator email
      */
-    private boolean isDefaultAdministratorEmail (String emailOfLoginRequest) {
-        return emailOfLoginRequest.equals(getDefaultAdministratorEmail());
+    private static boolean isDefaultAdministratorEmail(String emailOfLoginRequest) {
+        return emailOfLoginRequest.equals(DEFAULT_ADMINISTRATOR_EMAIL);
     }
 
     /**
@@ -84,10 +167,19 @@ public class AuthorizedUser extends User {
      * @param emailOfLoginRequest the email of the login request
      * @return if the emailOfLoginRequest is the default translator email
      */
-    private boolean isDefaultTranslatorEmail (String emailOfLoginRequest) {
-        return emailOfLoginRequest.equals(getDefaultTranslatorEmail());
+    private static boolean isDefaultTranslatorEmail(String emailOfLoginRequest) {
+        return emailOfLoginRequest.equals(DEFAULT_TRANSLATOR_EMAIL);
     }
 
+    /**
+     * Answer if the password is the default password
+     *
+     * @param password the password of the login request
+     * @return if the password of the login request is the default password
+     */
+    private static boolean isDefaultPassword(String password) {
+        return password.equals(DEFAULT_PASSWORD);
+    }
     /**
      * Encrypt the authorized user password.
      *
@@ -95,7 +187,7 @@ public class AuthorizedUser extends User {
      * @return a boolean indication if the encryption was successful
      * @throws EncryptionException encrypting the password failed
      */
-    public byte[] encryptPassword (String passwordToEncrypt) throws EncryptionException {
+    private byte[] encryptPassword(String passwordToEncrypt) throws EncryptionException {
         if (encryptionKeyStringForUser != null) {
             try {
                 return createCipher(Cipher.ENCRYPT_MODE).doFinal(passwordToEncrypt.getBytes());
@@ -117,7 +209,7 @@ public class AuthorizedUser extends User {
      * @return the decrypted password
      * @throws DecryptionException if decryption failed
      */
-    public String decryptPassword(byte[] encryptedPassword) throws DecryptionException {
+    private String decryptPassword(byte[] encryptedPassword) throws DecryptionException {
         try {
             return new String(createCipher(Cipher.DECRYPT_MODE).doFinal(encryptedPassword));
         } catch (BadPaddingException | IllegalBlockSizeException | FailedToCreateCipherException e) {
@@ -146,7 +238,7 @@ public class AuthorizedUser extends User {
      * @return the configured cipher
      * @throws FailedToCreateCipherException if the creation or set up failed
      */
-    private Cipher createCipher (int cipherMode) throws FailedToCreateCipherException {
+    private Cipher createCipher(int cipherMode) throws FailedToCreateCipherException {
         try {
             Key aesKey = new SecretKeySpec(encryptionKeyStringForUser.getEncoded(), "AES");
             Cipher cipher = Cipher.getInstance("AES");
@@ -159,27 +251,20 @@ public class AuthorizedUser extends User {
     }
 
     /**
-     * Answer the default administrator email.
+     * Check if a email is valid
      *
-     * @return the default administrator email
+     * @param email email to validate
+     * @return if the given email is valid
      */
-    public static String getDefaultAdministratorEmail() {
-        return DEFAULT_ADMINISTRATOR_EMAIL;
-    }
-
-    /**
-     * Answer the default translator email.
-     *
-     * @return the default translator email
-     */
-    public static String getDefaultTranslatorEmail() {
-        return DEFAULT_TRANSLATOR_EMAIL;
+    private static boolean isValidEmail(String email) { //https://stackoverflow.com/questions/8204680/java-regex-email
+        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(email);
+        return matcher.find();
     }
 
     /**
      * Set the Password of the authorized user.
      *
-     * @param password the password of the authorized user
+     * @param password the password to assign
      */
     private void setPassword(String password) {
         this.password = password;
@@ -195,9 +280,27 @@ public class AuthorizedUser extends User {
     }
 
     /**
+     * Answer the email of the authorized user.
+     *
+     * @return the email of the authorized user
+     */
+    public String getEmail() {
+        return email;
+    }
+
+    /**
+     * Set the email of the authorized user.
+     *
+     * @param email the email to assign
+     */
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    /**
      * Set the encryptionKeyStringForUser.
      *
-     * @param secretAesKey a SecretKey aes key
+     * @param secretAesKey the SecretKey to assign
      */
     private void setEncryptionKeyStringForUser(SecretKey secretAesKey) {
         encryptionKeyStringForUser = secretAesKey;
