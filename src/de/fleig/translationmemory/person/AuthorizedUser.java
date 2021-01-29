@@ -74,7 +74,7 @@ public class AuthorizedUser extends User {
      *
      * @param isAdministrator indicates if the returned authorized user is an administrator or translator
      * @return a new instance of administrator or translator
-     */
+     */ //TODO check if user is already registered - better if email is already used
     protected static AuthorizedUser createNewAuthorizedUser(boolean isAdministrator) {
         Scanner inputScanner = new Scanner(System.in);
         String email;
@@ -82,8 +82,12 @@ public class AuthorizedUser extends User {
         Globals.printToConsole("Welcome, this is your first login. Please change your email and password.");
         Globals.printToConsole("Please enter a new email address.");
         String input = inputScanner.nextLine();
-        while (isInvalidEmail(input)) {
-            Globals.printToConsole("Email not valid try again.");
+        while (isInvalidEmail(input) || AuthorizedUser.isDefaultEmail(input)) {
+            if (AuthorizedUser.isDefaultEmail(input)) {
+                Globals.printToConsole("Cannot use default email!");
+            } else {
+                Globals.printToConsole("Email not valid try again.");
+            }
             input = inputScanner.nextLine();
         }
         email = input;

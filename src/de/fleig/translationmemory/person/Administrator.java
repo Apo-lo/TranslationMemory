@@ -1,7 +1,10 @@
 package de.fleig.translationmemory.person;
 
+import java.util.ArrayList;
+
 public class Administrator extends AuthorizedUser {
     protected static final String DEFAULT_ADMINISTRATOR_EMAIL = "admin@admin.com"; // Hardcoded for first sign in.
+    public static final ArrayList<String> LANGUAGES_TO_CREATE = new ArrayList<>(); //TODO Also save
 
     public Administrator (String email, String password) {
         super(email, password);

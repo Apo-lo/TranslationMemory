@@ -1,7 +1,9 @@
 package de.fleig.translationmemory.person;
 
 import de.fleig.translationmemory.application.Globals;
+import de.fleig.translationmemory.vocabulary.Word;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -10,7 +12,8 @@ import java.util.regex.Pattern;
 public class User {
     protected String email;
 
-    private static final HashMap<String, User> registeredUsers = new HashMap<>();
+    private static final HashMap<String, User> registeredUsers = new HashMap<>(); //TODO save and load
+    private final ArrayList<Word> createdWords = new ArrayList<>(); //TODO save and load
 
     protected static final Pattern VALID_EMAIL_ADDRESS_REGEX =
             Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE); //https://stackoverflow.com/questions/8204680/java-regex-email
@@ -87,5 +90,23 @@ public class User {
      */
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    /**
+     * Answer the createdWOrds of the user
+     *
+     * @return the created words of the user
+     */
+    public ArrayList<Word> getCreatedWords() {
+        return createdWords;
+    }
+
+    /**
+     * Answer the number of the words created by the user
+     *
+     * @return the number of words created by the user
+     */
+    public int getCreatedWordsCount() {
+        return getCreatedWords().size();
     }
 }

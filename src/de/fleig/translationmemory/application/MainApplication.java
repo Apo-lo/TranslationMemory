@@ -1,11 +1,11 @@
 package de.fleig.translationmemory.application;
 
 import de.fleig.translationmemory.exception.LoginFailedException;
-import de.fleig.translationmemory.exception.WordNotFoundException;
 import de.fleig.translationmemory.person.Administrator;
 import de.fleig.translationmemory.person.AuthorizedUser;
 import de.fleig.translationmemory.person.Translator;
 import de.fleig.translationmemory.person.User;
+import de.fleig.translationmemory.vocabulary.Language;
 import de.fleig.translationmemory.vocabulary.Word;
 
 import java.util.ArrayList;
@@ -55,10 +55,13 @@ public class MainApplication {
                     }
                     break;
                 case "-search":
-                    searchForWord();
+                    Word.searchForWord();
                     break;
                 case "-create -word":
-                    Word.createWord();
+                    Word.createWord("");
+                    break;
+                case "-create -language":
+                    Language.createLanguage("");
                     break;
                 case "-logout":
                     Globals.printToConsole("Logging out and exiting application");
@@ -144,40 +147,6 @@ public class MainApplication {
     }
 
     /**
-     * Search for a word if it exist print the word and all its translations.
-     * Otherwise ask if the User want to creat the word.
-     * The User can search for another word if the word does not exist.
-     */
-    private void searchForWord() {
-        Scanner inputScanner = new Scanner(System.in);
-
-        while (true) {
-            Globals.printToConsole("What Word would you like to search for");
-            String input = inputScanner.nextLine();
-            if (Word.doesWordExists(input)) {
-                try {
-                    Word.getWord(input).printWordWithTranslations();
-                } catch (WordNotFoundException ignored) {
-                    //No need to do something with the exception, because the method getWord() will only be called if the word is present.
-                }
-                break;
-            } else {
-                Globals.printToConsole("Word does not exist yet, do you want to create it? (yes/no)");
-                input = inputScanner.nextLine();
-                if (input.equals("yes")) {
-                    Word.createWord();
-                } else {
-                    Globals.printToConsole("Press enter to search for another word typ \"-cancel\" to cancel");
-                    if (!inputScanner.nextLine().equals("-cancel")) {
-                        searchForWord();
-                    }
-                }
-            }
-        }
-
-    }
-
-    /**
      * Create an ArrayList of available options for the Translator
      *
      * @return an ArrayList of available options
@@ -189,20 +158,21 @@ public class MainApplication {
     }
 
     private ArrayList<String> optionsForAdministrator() {
-        ArrayList<String> optionsForTranslators = optionsForAuthorizedUsers();
+        ArrayList<String> optionsForAdministrator = optionsForAuthorizedUsers();
 
-        return optionsForTranslators;
+        optionsForAdministrator.add("-create -language             - create a language");
+        return optionsForAdministrator;
     }
 
     private ArrayList<String> optionsForAuthorizedUsers() {
         ArrayList<String> optionsForAuthorizedUsers = optionsForUsers();
 
-        optionsForAuthorizedUsers.add("-show            - list all translated words");
-        optionsForAuthorizedUsers.add("-create          - create a languages");
-        optionsForAuthorizedUsers.add("-logout          - to log out");
+        optionsForAuthorizedUsers.add("-show                - list all translated words");
+        optionsForAuthorizedUsers.add("-logout              - to log out");
 
         return optionsForAuthorizedUsers;
     }
+
     /**
      * Print the options available for the user type
      *
