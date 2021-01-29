@@ -15,10 +15,10 @@ public class Globals {
     /**
      * Prints the parameter on the console
      *
-     * @param stringToLog a string to print on the console
+     * @param stringToPrint a string to print on the console
      */
-    public static void printToConsole(String stringToLog) {
-        System.out.println(stringToLog);
+    public static void printToConsole(String stringToPrint) {
+        System.out.println(stringToPrint);
     }
 
     /**

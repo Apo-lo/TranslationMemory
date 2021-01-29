@@ -13,23 +13,15 @@ import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class AuthorizedUser extends User {
     private static final String DEFAULT_ADMINISTRATOR_EMAIL = "admin@admin.com"; // Hardcoded for first sign in.
     private static final String DEFAULT_TRANSLATOR_EMAIL = "translator@translator.com";
     private static final String DEFAULT_PASSWORD = "default_password";
 
-    public static final Pattern VALID_EMAIL_ADDRESS_REGEX =
-            Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE); //https://stackoverflow.com/questions/8204680/java-regex-email
+    private static final HashMap<String, AuthorizedUser> registeredAuthorizedUsers = new HashMap<>();
 
-
-    private static final HashMap<String, AuthorizedUser> registeredUsers = new HashMap<>();
-
-    private String email;
     private String password;
-    private SecretKey encryptionKeyStringForUser;
 
     /**
      * First check if a user is already registered, if so check if the password is correct,
@@ -45,25 +37,25 @@ public class AuthorizedUser extends User {
      * </ul>
      *
      * @return a new instance of the user type
-     * @throws LoginFailedException if the login fails because of a wrong email or password
+     * @throws LoginFailedException if the login fails
      */
     public static AuthorizedUser login(String email, String password) throws LoginFailedException {
+        AuthorizedUser userToSignIn;
         if(isUserAlreadyRegistered(email)) {
-            AuthorizedUser userToSignIn = registeredUsers.get(email);
+            userToSignIn = registeredAuthorizedUsers.get(email);
             if (isPasswordValidForUser(userToSignIn, password)) {
                 return userToSignIn;
             } else {
                 throw new LoginFailedException();
             }
         } else if (isDefaultEmail(email) && isDefaultPassword(password)) {
-            AuthorizedUser newUser;
             if (isDefaultAdministratorEmail(email)) {
-                newUser = createAdministrator();
+                userToSignIn = createAdministrator();
             } else {
-                newUser = createTranslator();
+                userToSignIn = createTranslator();
             }
-            registeredUsers.put(newUser.getEmail(), newUser);
-            return newUser;
+            registeredAuthorizedUsers.put(userToSignIn.getEmail(), userToSignIn);
+            return userToSignIn;
         }
         throw new LoginFailedException();
     }
@@ -72,25 +64,25 @@ public class AuthorizedUser extends User {
      * Get the email and password from the user and return a new instance of translator or administrator
      *
      * @param isAdministrator indicates if the returned authorized user is an administrator or translator
-     * @return a new instance of administrator of translator
+     * @return a new instance of administrator or translator
      */
     private static AuthorizedUser createNewAuthorizedUser(boolean isAdministrator) {
         Scanner inputScanner = new Scanner(System.in);
         String email;
         String password;
-
-        Globals.printToConsole("Please enter a new email address");
+        Globals.printToConsole("Welcome, this is your first login. Please change your email and password.");
+        Globals.printToConsole("Please enter a new email address.");
         String input = inputScanner.nextLine();
-        while (!isValidEmail(input)) {
-            Globals.printToConsole("Email not valid try again");
+        while (isInvalidEmail(input)) {
+            Globals.printToConsole("Email not valid try again.");
             input = inputScanner.nextLine();
         }
         email = input;
 
-        Globals.printToConsole("Please enter a new password");
+        Globals.printToConsole("Please enter a new password.");
         password = inputScanner.nextLine();
 
-        if (isAdministrator) {
+        if(isAdministrator) {
             return new Administrator(email, password);
         } else {
             return new Translator(email, password);
@@ -102,7 +94,7 @@ public class AuthorizedUser extends User {
      *
      * @return a new instance of translator
      */
-    public static Translator createTranslator() {
+    private static Translator createTranslator() {
         return (Translator) createNewAuthorizedUser(false);
     }
 
@@ -122,8 +114,7 @@ public class AuthorizedUser extends User {
      * @param password password of the user
      */
     public AuthorizedUser(String email, String password) {
-        createAesKeyAndSetForAuthorizedUser();
-        this.email = email;
+        super(email);
         this.password = password;
     }
 
@@ -135,7 +126,7 @@ public class AuthorizedUser extends User {
      * @return if there is a registered user with the given parameter as email
      */
     private static boolean isUserAlreadyRegistered(String emailOfLoginRequest) {
-        return registeredUsers.containsKey(emailOfLoginRequest);
+        return registeredAuthorizedUsers.containsKey(emailOfLoginRequest);
     }
 
     private static boolean isPasswordValidForUser(AuthorizedUser userToSignIn, String passwordOfLoginRequest) {
@@ -188,18 +179,13 @@ public class AuthorizedUser extends User {
      * @throws EncryptionException encrypting the password failed
      */
     private byte[] encryptPassword(String passwordToEncrypt) throws EncryptionException {
-        if (encryptionKeyStringForUser != null) {
-            try {
-                return createCipher(Cipher.ENCRYPT_MODE).doFinal(passwordToEncrypt.getBytes());
-            } catch (BadPaddingException | IllegalBlockSizeException | FailedToCreateCipherException e) {
-                Globals.errorLog("Failed to encrypt password");
-                Globals.errorLog(e.getMessage());
-            }
-        } else {
-            Globals.printToConsole("Saving not possible try again");
+        try {
+            return createCipher(Cipher.ENCRYPT_MODE).doFinal(passwordToEncrypt.getBytes());
+        } catch (BadPaddingException | IllegalBlockSizeException | FailedToCreateCipherException e) {
+            Globals.errorLog("Failed to encrypt password");
+            Globals.errorLog(e.getMessage());
             throw new EncryptionException();
         }
-        return null;
     }
 
     /**
@@ -219,19 +205,6 @@ public class AuthorizedUser extends User {
     }
 
     /**
-     * Creat a new secret aes key and set it for the user.
-     */
-    private void createAesKeyAndSetForAuthorizedUser() {
-        try {
-            KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-            keyGen.init(128);
-            setEncryptionKeyStringForUser(keyGen.generateKey());
-        } catch (NoSuchAlgorithmException e) {
-            Globals.errorLog("Failed to create Secret Key");
-        }
-    }
-
-    /**
      * Creat a cipher for encrypting and decrypting the password
      *
      * @param cipherMode indicates in which mode the cypher is configured
@@ -240,7 +213,8 @@ public class AuthorizedUser extends User {
      */
     private Cipher createCipher(int cipherMode) throws FailedToCreateCipherException {
         try {
-            Key aesKey = new SecretKeySpec(encryptionKeyStringForUser.getEncoded(), "AES");
+            String aesKeyString = "t6w9z$C&F)J@McQf";
+            Key aesKey = new SecretKeySpec(aesKeyString.getBytes(), "AES");
             Cipher cipher = Cipher.getInstance("AES");
             cipher.init(cipherMode, aesKey);
             return cipher;
@@ -250,16 +224,6 @@ public class AuthorizedUser extends User {
         }
     }
 
-    /**
-     * Check if a email is valid
-     *
-     * @param email email to validate
-     * @return if the given email is valid
-     */
-    private static boolean isValidEmail(String email) { //https://stackoverflow.com/questions/8204680/java-regex-email
-        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(email);
-        return matcher.find();
-    }
 
     /**
      * Set the Password of the authorized user.
@@ -279,30 +243,4 @@ public class AuthorizedUser extends User {
         return password;
     }
 
-    /**
-     * Answer the email of the authorized user.
-     *
-     * @return the email of the authorized user
-     */
-    public String getEmail() {
-        return email;
-    }
-
-    /**
-     * Set the email of the authorized user.
-     *
-     * @param email the email to assign
-     */
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    /**
-     * Set the encryptionKeyStringForUser.
-     *
-     * @param secretAesKey the SecretKey to assign
-     */
-    private void setEncryptionKeyStringForUser(SecretKey secretAesKey) {
-        encryptionKeyStringForUser = secretAesKey;
-    }
 }

@@ -6,8 +6,8 @@ public class Translator extends AuthorizedUser {
         super(email, password);
     }
 
-    @Override
-    public String toString() {
-        return (this.getClass().toString() + " " + getPassword() + " " + getEmail());
-    }
+
+
+
+
 }
