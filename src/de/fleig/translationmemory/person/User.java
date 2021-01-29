@@ -10,7 +10,6 @@ import java.util.regex.Pattern;
 public class User {
     protected String email;
 
-
     private static final HashMap<String, User> registeredUsers = new HashMap<>();
 
     protected static final Pattern VALID_EMAIL_ADDRESS_REGEX =

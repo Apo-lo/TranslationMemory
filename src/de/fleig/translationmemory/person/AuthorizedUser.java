@@ -15,13 +15,22 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class AuthorizedUser extends User {
-    private static final String DEFAULT_ADMINISTRATOR_EMAIL = "admin@admin.com"; // Hardcoded for first sign in.
-    private static final String DEFAULT_TRANSLATOR_EMAIL = "translator@translator.com";
-    private static final String DEFAULT_PASSWORD = "default_password";
+    private static final String DEFAULT_PASSWORD = "default_password"; // Hardcoded for first sign in.
 
     private static final HashMap<String, AuthorizedUser> registeredAuthorizedUsers = new HashMap<>();
 
     private String password;
+
+    /**
+     * Constructor of AuthorizedUser
+     *
+     * @param email email of the user
+     * @param password password of the user
+     */
+    public AuthorizedUser(String email, String password) {
+        super(email);
+        this.password = password;
+    }
 
     /**
      * First check if a user is already registered, if so check if the password is correct,
@@ -49,10 +58,10 @@ public class AuthorizedUser extends User {
                 throw new LoginFailedException();
             }
         } else if (isDefaultEmail(email) && isDefaultPassword(password)) {
-            if (isDefaultAdministratorEmail(email)) {
-                userToSignIn = createAdministrator();
+            if (Administrator.isDefaultAdministratorEmail(email)) {
+                userToSignIn = Administrator.createAdministrator();
             } else {
-                userToSignIn = createTranslator();
+                userToSignIn = Translator.createTranslator();
             }
             registeredAuthorizedUsers.put(userToSignIn.getEmail(), userToSignIn);
             return userToSignIn;
@@ -66,7 +75,7 @@ public class AuthorizedUser extends User {
      * @param isAdministrator indicates if the returned authorized user is an administrator or translator
      * @return a new instance of administrator or translator
      */
-    private static AuthorizedUser createNewAuthorizedUser(boolean isAdministrator) {
+    protected static AuthorizedUser createNewAuthorizedUser(boolean isAdministrator) {
         Scanner inputScanner = new Scanner(System.in);
         String email;
         String password;
@@ -90,35 +99,6 @@ public class AuthorizedUser extends User {
     }
 
     /**
-     * Create a new translator
-     *
-     * @return a new instance of translator
-     */
-    private static Translator createTranslator() {
-        return (Translator) createNewAuthorizedUser(false);
-    }
-
-    /**
-     * Create a new administrator
-     *
-     * @return a new instance of administrator
-     */
-    private static Administrator createAdministrator() {
-        return (Administrator) createNewAuthorizedUser(true);
-    }
-
-    /**
-     * Constructor of AuthorizedUser
-     *
-     * @param email email of the user
-     * @param password password of the user
-     */
-    public AuthorizedUser(String email, String password) {
-        super(email);
-        this.password = password;
-    }
-
-    /**
      * Loop over the registeredUsers
      * and return if a email of a user equal the email of the login request.
      *
@@ -139,27 +119,7 @@ public class AuthorizedUser extends User {
      * @return if it is a default email
      */
     private static boolean isDefaultEmail(String emailOfLoginRequest) {
-        return isDefaultAdministratorEmail(emailOfLoginRequest)|| isDefaultTranslatorEmail(emailOfLoginRequest);
-    }
-
-    /**
-     * Answer if the emailOfLoginRequest is the default administrator email.
-     *
-     * @param emailOfLoginRequest the email of the login request
-     * @return if the emailOfLoginRequest is the default administrator email
-     */
-    private static boolean isDefaultAdministratorEmail(String emailOfLoginRequest) {
-        return emailOfLoginRequest.equals(DEFAULT_ADMINISTRATOR_EMAIL);
-    }
-
-    /**
-     * Answer if the emailOfLoginRequest is the default translator email.
-     *
-     * @param emailOfLoginRequest the email of the login request
-     * @return if the emailOfLoginRequest is the default translator email
-     */
-    private static boolean isDefaultTranslatorEmail(String emailOfLoginRequest) {
-        return emailOfLoginRequest.equals(DEFAULT_TRANSLATOR_EMAIL);
+        return Administrator.isDefaultAdministratorEmail(emailOfLoginRequest)|| Translator.isDefaultTranslatorEmail(emailOfLoginRequest);
     }
 
     /**
@@ -213,7 +173,7 @@ public class AuthorizedUser extends User {
      */
     private Cipher createCipher(int cipherMode) throws FailedToCreateCipherException {
         try {
-            String aesKeyString = "t6w9z$C&F)J@McQf";
+            String aesKeyString = "t6w9z$C&F)J@McQf"; // Don't know if this is good practise, but better than saving the password in plain text
             Key aesKey = new SecretKeySpec(aesKeyString.getBytes(), "AES");
             Cipher cipher = Cipher.getInstance("AES");
             cipher.init(cipherMode, aesKey);

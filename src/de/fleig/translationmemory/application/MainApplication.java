@@ -1,6 +1,7 @@
 package de.fleig.translationmemory.application;
 
 import de.fleig.translationmemory.exception.LoginFailedException;
+import de.fleig.translationmemory.exception.WordNotFoundException;
 import de.fleig.translationmemory.person.Administrator;
 import de.fleig.translationmemory.person.AuthorizedUser;
 import de.fleig.translationmemory.person.Translator;
@@ -37,6 +38,7 @@ public class MainApplication {
                 case "-help":
                 case "help": //to ensure that help is given
                     printOptions(currentUser);
+                    break;
                 case "-exit":
                     Globals.printToConsole("Exiting application");
                     programRunning = false;
@@ -51,8 +53,13 @@ public class MainApplication {
                     } else {
                         Globals.printToConsole("Login canceled");
                     }
+                    break;
                 case "-search":
-
+                    searchForWord();
+                    break;
+                case "-create -word":
+                    Word.createWord();
+                    break;
                 case "-logout":
                     Globals.printToConsole("Logging out and exiting application");
                     programRunning = false;
@@ -127,14 +134,20 @@ public class MainApplication {
     private ArrayList<String> optionsForUsers() {
         ArrayList<String> optionsForUsers = new ArrayList<>();
 
-        optionsForUsers.add("-help - list all available options");
-        optionsForUsers.add("-exit - exit the application");
-        optionsForUsers.add("-search - search for an Word");
-        optionsForUsers.add("-login - sign in as Administrator or Translator");
+        optionsForUsers.add("-help                  - list all available options");
+        optionsForUsers.add("-exit                  - exit the application");
+        optionsForUsers.add("-search                - search for an Word");
+        optionsForUsers.add("-create -word          - create a new word");
+        optionsForUsers.add("-login                 - sign in as Administrator or Translator");
 
         return optionsForUsers;
     }
 
+    /**
+     * Search for a word if it exist print the word and all its translations.
+     * Otherwise ask if the User want to creat the word.
+     * The User can search for another word if the word does not exist.
+     */
     private void searchForWord() {
         Scanner inputScanner = new Scanner(System.in);
 
@@ -142,30 +155,54 @@ public class MainApplication {
             Globals.printToConsole("What Word would you like to search for");
             String input = inputScanner.nextLine();
             if (Word.doesWordExists(input)) {
-                Word.getWord(input); //TODO print word
+                try {
+                    Word.getWord(input).printWordWithTranslations();
+                } catch (WordNotFoundException ignored) {
+                    //No need to do something with the exception, because the method getWord() will only be called if the word is present.
+                }
                 break;
-            } else { //TODO Create word
-                Globals.printToConsole("Word does not exist jet, do you want to create it? (yes/no)");
-                //input = inputScanner.nextLine();
+            } else {
+                Globals.printToConsole("Word does not exist yet, do you want to create it? (yes/no)");
+                input = inputScanner.nextLine();
+                if (input.equals("yes")) {
+                    Word.createWord();
+                } else {
+                    Globals.printToConsole("Press enter to search for another word typ \"-cancel\" to cancel");
+                    if (!inputScanner.nextLine().equals("-cancel")) {
+                        searchForWord();
+                    }
+                }
             }
         }
 
     }
+
     /**
      * Create an ArrayList of available options for the Translator
      *
      * @return an ArrayList of available options
      */
     private ArrayList<String> optionsForTranslators() {
-        ArrayList<String> optionsForTranslators = optionsForUsers();
-
-        optionsForTranslators.add("-show - list all translated words");
-        optionsForTranslators.add("-language - list all assigned languages");
-        optionsForTranslators.add("-logout - to log out");
+        ArrayList<String> optionsForTranslators = optionsForAuthorizedUsers();
 
         return optionsForTranslators;
     }
 
+    private ArrayList<String> optionsForAdministrator() {
+        ArrayList<String> optionsForTranslators = optionsForAuthorizedUsers();
+
+        return optionsForTranslators;
+    }
+
+    private ArrayList<String> optionsForAuthorizedUsers() {
+        ArrayList<String> optionsForAuthorizedUsers = optionsForUsers();
+
+        optionsForAuthorizedUsers.add("-show            - list all translated words");
+        optionsForAuthorizedUsers.add("-create          - create a languages");
+        optionsForAuthorizedUsers.add("-logout          - to log out");
+
+        return optionsForAuthorizedUsers;
+    }
     /**
      * Print the options available for the user type
      *
@@ -174,7 +211,7 @@ public class MainApplication {
     private void printOptions(User currentUser) {
         ArrayList<String> optionsToPrint;
         if (currentUser instanceof Administrator) {
-            return;
+            optionsToPrint = optionsForAdministrator();
         } else if (currentUser instanceof Translator) {
             optionsToPrint = optionsForTranslators();
         } else {
