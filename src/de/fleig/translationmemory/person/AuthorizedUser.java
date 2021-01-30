@@ -12,7 +12,6 @@ import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
-import java.util.Scanner;
 
 public class AuthorizedUser extends User {
     private static final String DEFAULT_PASSWORD = "default_password"; // Hardcoded for first sign in.
@@ -69,31 +68,39 @@ public class AuthorizedUser extends User {
         throw new LoginFailedException();
     }
 
+    protected static AuthorizedUser askForPasswordAndTryLogin(String email) throws LoginFailedException {
+
+        Globals.printToConsole("Please enter the password.");
+        String password = Globals.inputScanner.nextLine();
+
+        return AuthorizedUser.login(email, password);
+    }
     /**
      * Get the email and password from the user and return a new instance of translator or administrator
      *
      * @param isAdministrator indicates if the returned authorized user is an administrator or translator
      * @return a new instance of administrator or translator
-     */ //TODO check if user is already registered - better if email is already used
+     */
     protected static AuthorizedUser createNewAuthorizedUser(boolean isAdministrator) {
-        Scanner inputScanner = new Scanner(System.in);
         String email;
         String password;
         Globals.printToConsole("Welcome, this is your first login. Please change your email and password.");
         Globals.printToConsole("Please enter a new email address.");
-        String input = inputScanner.nextLine();
-        while (isInvalidEmail(input) || AuthorizedUser.isDefaultEmail(input)) {
+        String input = Globals.inputScanner.nextLine();
+        while (isInvalidEmail(input) || isDefaultEmail(input) || isUserAlreadyRegistered(input)) {
             if (AuthorizedUser.isDefaultEmail(input)) {
                 Globals.printToConsole("Cannot use default email!");
-            } else {
+            } else if (isInvalidEmail(input)){
                 Globals.printToConsole("Email not valid try again.");
+            } else {
+                Globals.printToConsole("Email already used, please try again.");
             }
-            input = inputScanner.nextLine();
+            input = Globals.inputScanner.nextLine();
         }
         email = input;
 
         Globals.printToConsole("Please enter a new password.");
-        password = inputScanner.nextLine();
+        password = Globals.inputScanner.nextLine();
 
         if(isAdministrator) {
             return new Administrator(email, password);
@@ -109,7 +116,7 @@ public class AuthorizedUser extends User {
      * @param emailOfLoginRequest the email of the login request
      * @return if there is a registered user with the given parameter as email
      */
-    private static boolean isUserAlreadyRegistered(String emailOfLoginRequest) {
+    protected static boolean isUserAlreadyRegistered(String emailOfLoginRequest) {
         return registeredAuthorizedUsers.containsKey(emailOfLoginRequest);
     }
 
@@ -122,7 +129,7 @@ public class AuthorizedUser extends User {
      * @param emailOfLoginRequest the email of the login request
      * @return if it is a default email
      */
-    private static boolean isDefaultEmail(String emailOfLoginRequest) {
+    protected static boolean isDefaultEmail(String emailOfLoginRequest) {
         return Administrator.isDefaultAdministratorEmail(emailOfLoginRequest)|| Translator.isDefaultTranslatorEmail(emailOfLoginRequest);
     }
 

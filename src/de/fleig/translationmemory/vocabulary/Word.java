@@ -7,7 +7,6 @@ import de.fleig.translationmemory.exception.WordNotFoundException;
 import de.fleig.translationmemory.person.Administrator;
 
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.util.UUID;
 
 public class Word {
@@ -37,7 +36,6 @@ public class Word {
      * Create a new word and add it to the all words array list
      */
     public static void createWord(String wordToCreate) {
-        Scanner inputScanner = new Scanner(System.in);
         String word;
 
         if (doesWordExists(wordToCreate)) {
@@ -47,7 +45,7 @@ public class Word {
 
         if (wordToCreate.isEmpty()) {
             Globals.printToConsole("What word would you like to create?");
-            word = inputScanner.nextLine();
+            word = Globals.inputScanner.nextLine();
         } else {
             word = wordToCreate;
         }
@@ -58,7 +56,7 @@ public class Word {
         }
 
         Globals.printToConsole("In which Language is the word?");
-        String input = inputScanner.nextLine();
+        String input = Globals.inputScanner.nextLine();
 
         if(Language.doesLanguageExists(input)) {
             try {
@@ -81,10 +79,9 @@ public class Word {
      * The User can search for another word if the word does not exist.
      */
     public static void searchForWord() {
-        Scanner inputScanner = new Scanner(System.in);
 
         Globals.printToConsole("What word would you like to search for");
-        String input= inputScanner.nextLine();
+        String input= Globals.inputScanner.nextLine();
         String word = input;
         if (Word.doesWordExists(input)) {
             try {
@@ -94,12 +91,12 @@ public class Word {
             }
         } else {
             Globals.printToConsole("Word does not exist yet, do you want to create it? (yes/no)");
-            input = inputScanner.nextLine();
+            input = Globals.inputScanner.nextLine();
             if (input.equalsIgnoreCase("yes")) {
                 Word.createWord(word);
             } else {
-                Globals.printToConsole("Press enter to search for another word typ \"-cancel\" to cancel");
-                if (!inputScanner.nextLine().equals("-cancel")) {
+                Globals.printToConsole("Press enter to search for another word or typ \"-cancel\" to cancel");
+                if (!Globals.inputScanner.nextLine().equals("-cancel")) {
                     searchForWord();
                 }
             }

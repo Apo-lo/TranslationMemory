@@ -28,4 +28,6 @@ public class Administrator extends AuthorizedUser {
     protected static boolean isDefaultAdministratorEmail(String emailOfLoginRequest) {
         return emailOfLoginRequest.equals(Administrator.DEFAULT_ADMINISTRATOR_EMAIL);
     }
+
+
 }

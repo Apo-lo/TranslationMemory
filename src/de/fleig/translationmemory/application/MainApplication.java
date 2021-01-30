@@ -9,7 +9,6 @@ import de.fleig.translationmemory.vocabulary.Language;
 import de.fleig.translationmemory.vocabulary.Word;
 
 import java.util.ArrayList;
-import java.util.Scanner;
 
 public class MainApplication {
 
@@ -24,25 +23,23 @@ public class MainApplication {
     }
 
     public void mainApplication() {
-        Scanner inputScanner = new Scanner(System.in);
         String input;
         boolean programRunning = true;
 
-        setCurrentUser(loginAsStandardUser());
+        setCurrentUser(loginAsStandardUserOrAuthorizedUserIfEmailIsSet());
         printWelcomeMessageForStandardUser();
 
         do {
-            input = inputScanner.nextLine();
+            input = Globals.inputScanner.nextLine();
 
             switch (input) {
                 case "-help":
-                case "help": //to ensure that help is given
+                case "help": // to ensure that help is given
                     printOptions(currentUser);
                     break;
                 case "-exit":
                     Globals.printToConsole("Exiting application");
-                    programRunning = false;
-                    break;
+                    Globals.shutDown();
                 case "-login":
                     if (login()) {
                         if (currentUser instanceof Administrator) {
@@ -78,8 +75,8 @@ public class MainApplication {
      *
      * @return a new user or a already registered user
      */
-    private User loginAsStandardUser() {
-        return User.loginAsStandardUser();
+    private User loginAsStandardUserOrAuthorizedUserIfEmailIsSet() {
+        return User.loginAsStandardUserOrAuthorizedUserIfEmailIsSet();
     }
 
     /**
@@ -88,21 +85,20 @@ public class MainApplication {
      * @return if the login request was successful
      */
     private boolean login() {
-        Scanner inputScanner = new Scanner(System.in);
 
         while (true) {
             Globals.printToConsole("Email: ");
-            String email = inputScanner.nextLine();
+            String email = Globals.inputScanner.nextLine();
 
             Globals.printToConsole("Password: ");
-            String password = inputScanner.nextLine();
+            String password = Globals.inputScanner.nextLine();
 
             try {
                 currentUser = AuthorizedUser.login(email, password);
                 return true;
             } catch (LoginFailedException e) {
                 Globals.printToConsole(e.getMessage() + ". Press press enter to try again or typ \"-cancel\" to cancel");
-                if (inputScanner.nextLine().equals("-cancel")) {
+                if (Globals.inputScanner.nextLine().equals("-cancel")) {
                     return false;
                 }
             }
@@ -153,6 +149,8 @@ public class MainApplication {
      */
     private ArrayList<String> optionsForTranslators() {
         ArrayList<String> optionsForTranslators = optionsForAuthorizedUsers();
+        
+        optionsForTranslators.add("-translate           - translate a word");
 
         return optionsForTranslators;
     }
@@ -168,7 +166,7 @@ public class MainApplication {
         ArrayList<String> optionsForAuthorizedUsers = optionsForUsers();
 
         optionsForAuthorizedUsers.add("-show                - list all translated words");
-        optionsForAuthorizedUsers.add("-logout              - to log out");
+        optionsForAuthorizedUsers.add("-logout              - to log out and exit");
 
         return optionsForAuthorizedUsers;
     }

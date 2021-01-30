@@ -1,15 +1,24 @@
 package de.fleig.translationmemory.application;
 
 import java.util.Locale;
+import java.util.Scanner;
 
 public class Globals {
     private static Locale[] allAvailableLocales;
+    public static final Scanner inputScanner = new Scanner(System.in);
 
     /**
      * Start up sequence of the application.
      */
     public static void startUp() {
         setAllAvailableLocales(Locale.getAvailableLocales());
+    }
+
+    /**
+     * Shut down the application
+     */
+    public static void shutDown() {
+
     }
 
     /**

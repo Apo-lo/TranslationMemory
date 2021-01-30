@@ -1,15 +1,16 @@
 package de.fleig.translationmemory.person;
 
 import de.fleig.translationmemory.application.Globals;
+import de.fleig.translationmemory.exception.LoginFailedException;
 import de.fleig.translationmemory.vocabulary.Word;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class User {
+
     protected String email;
 
     private static final HashMap<String, User> registeredUsers = new HashMap<>(); //TODO save and load
@@ -32,24 +33,44 @@ public class User {
      *
      * @return a new user or a already registered user
      */
-    public static User loginAsStandardUser() {
-        Scanner inputScanner = new Scanner(System.in);
+    public static User loginAsStandardUserOrAuthorizedUserIfEmailIsSet() {
         User theNewOrAlreadyExistingUser;
 
-        Globals.printToConsole("Hello, please enter your Email.");
-        String input = inputScanner.nextLine();
+        Globals.printToConsole("Please enter your Email.");
+        String input = Globals.inputScanner.nextLine();
         while (isInvalidEmail(input)) {
             Globals.printToConsole("Email not valid try again.");
-            input = inputScanner.nextLine();
+            input = Globals.inputScanner.nextLine();
         }
 
         if (doesUserExist(input)) {
             theNewOrAlreadyExistingUser = registeredUsers.get(input);
+        } else if (AuthorizedUser.isUserAlreadyRegistered(input) || AuthorizedUser.isDefaultEmail(input)) {
+            theNewOrAlreadyExistingUser = tryLoginAsAuthorizedUser(input);
         } else {
             theNewOrAlreadyExistingUser = new User(input);
         }
         registeredUsers.put(input, theNewOrAlreadyExistingUser);
         return theNewOrAlreadyExistingUser;
+    }
+
+    /**
+     * When logging in at start this method is used to check the user.
+     *
+     * @param email email of login
+     * @return the AuthorizedUser user associated to the email
+     */
+    private static AuthorizedUser tryLoginAsAuthorizedUser(String email) {
+        try {
+            return AuthorizedUser.askForPasswordAndTryLogin(email);
+        } catch (LoginFailedException e) {
+            Globals.printToConsole("Login failed, please try again or type \"-exit\" to close the program.");
+            if(Globals.inputScanner.nextLine().equals("-exit")) {
+                Globals.shutDown();
+            }
+            loginAsStandardUserOrAuthorizedUserIfEmailIsSet();
+        }
+        return null; // null is ok in this case, it will never be called because the user is forced to retry or to exit
     }
 
     /**

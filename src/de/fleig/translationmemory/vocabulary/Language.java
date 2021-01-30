@@ -5,7 +5,6 @@ import de.fleig.translationmemory.exception.LanguageNotFoundException;
 
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.Scanner;
 import java.util.UUID;
 
 public class Language {
@@ -94,7 +93,6 @@ public class Language {
      * Create a new word and add it to the all words array list
      */
     public static void createLanguage(String languageToCreate) {
-        Scanner inputScanner = new Scanner(System.in);
         String language;
 
         if (doesLanguageExists(languageToCreate)) {
@@ -104,7 +102,7 @@ public class Language {
 
         if (languageToCreate.isEmpty()) {
             Globals.printToConsole("What Language would you like to create?");
-            language = inputScanner.nextLine();
+            language = Globals.inputScanner.nextLine();
         } else {
             language = languageToCreate;
         }
