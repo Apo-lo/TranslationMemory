@@ -7,7 +7,6 @@ import de.fleig.translationmemory.vocabulary.Language;
 import de.fleig.translationmemory.vocabulary.Word;
 
 import java.util.ArrayList;
-import java.util.spi.AbstractResourceBundleProvider;
 
 public class Translator extends AuthorizedUser {
     protected static final String DEFAULT_TRANSLATOR_EMAIL = "translator@translator.com"; // Hardcoded for first sign in.
@@ -96,6 +95,12 @@ public class Translator extends AuthorizedUser {
         wordToTranslate.ALL_TRANSLATIONS_OF_WORD.add(theTranslatedWord);
     }
 
+    /**
+     * Answer if the Translator is allowed to translate a word in the parameter language
+     *
+     * @param languageToTranslate the language the word should be translated to
+     * @return if the translator is allowed to translate in that language
+     */
     private boolean isAllowedToTranslateLanguage(Language languageToTranslate) {
         return LANGUAGES_TO_TRANSLATE.contains(languageToTranslate);
     }
