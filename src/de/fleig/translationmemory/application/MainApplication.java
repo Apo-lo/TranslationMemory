@@ -21,7 +21,6 @@ public class MainApplication {
         Globals.startUp();
         mainApplication();
     }
-
     public void mainApplication() {
         String input;
         boolean programRunning = true;
@@ -41,6 +40,9 @@ public class MainApplication {
                     Globals.printToConsole("Exiting application");
                     Globals.shutDown();
                 case "-login":
+                    if ((currentUser instanceof AuthorizedUser)) {
+                        Globals.printToConsole("Already logged in!");
+                    }
                     if (login()) {
                         if (currentUser instanceof Administrator) {
                             printWelcomeMessageForAdministrator();
@@ -55,14 +57,30 @@ public class MainApplication {
                     Word.searchForWord();
                     break;
                 case "-create -word":
-                    Word.createWord("");
+                    Word.createWord();
                     break;
                 case "-create -language":
-                    Language.createLanguage("");
+                    if (currentUser instanceof Administrator) {
+                        Language.createLanguage();
+                    } else {
+                        Globals.printToConsole("Not allowed to perform action!");
+                    }
+                    break;
+                case "-assign":
+                    if (currentUser instanceof Administrator) {
+                        Administrator administrator = (Administrator) MainApplication.getCurrentUser();
+                        administrator.assignTranslator();
+                    } else {
+                        Globals.printToConsole("Not allowed to perform action!");
+                    }
                     break;
                 case "-logout":
-                    Globals.printToConsole("Logging out and exiting application");
-                    programRunning = false;
+                    if (currentUser instanceof  AuthorizedUser) {
+                        Globals.printToConsole("Logging out and exiting application");
+                        programRunning = false;
+                    } else {
+                        Globals.printToConsole("Not allowed to perform action!");
+                    }
                     break;
                 default:
                     Globals.printToConsole("Unknown command try \"-help\" for a list of available commands");
@@ -71,7 +89,7 @@ public class MainApplication {
     }
 
     /**
-     * Log in as a standard user
+     * Log in as a standard user or if email is registered as authorized user.
      *
      * @return a new user or a already registered user
      */
@@ -125,8 +143,9 @@ public class MainApplication {
     private void printWelcomeMessageForAdministrator() {
         Globals.printToConsole("Hello " + currentUser.getEmail());
     }
+
     /**
-     * Create an ArrayList of available options for the user
+     * Create an ArrayList of available options for the user.
      *
      * @return an ArrayList of available options
      */
@@ -143,25 +162,36 @@ public class MainApplication {
     }
 
     /**
-     * Create an ArrayList of available options for the Translator
+     * Create an ArrayList of available options for the Translator.
      *
      * @return an ArrayList of available options
      */
     private ArrayList<String> optionsForTranslators() {
         ArrayList<String> optionsForTranslators = optionsForAuthorizedUsers();
-        
+
         optionsForTranslators.add("-translate           - translate a word");
 
         return optionsForTranslators;
     }
 
+    /**
+     * Create an ArrayList of available options for the Administrator.
+     *
+     * @return an ArrayList of available options
+     */
     private ArrayList<String> optionsForAdministrator() {
         ArrayList<String> optionsForAdministrator = optionsForAuthorizedUsers();
 
         optionsForAdministrator.add("-create -language             - create a language");
+        optionsForAdministrator.add("-assign                       - assign a translator to a language ");
         return optionsForAdministrator;
     }
 
+    /**
+     * Create an ArrayList of available options for authorized users.
+     *
+     * @return an ArrayList of available options
+     */
     private ArrayList<String> optionsForAuthorizedUsers() {
         ArrayList<String> optionsForAuthorizedUsers = optionsForUsers();
 
@@ -172,7 +202,7 @@ public class MainApplication {
     }
 
     /**
-     * Print the options available for the user type
+     * Print the options available for the user type.
      *
      * @param currentUser type of user (User, Administrator. Translator)
      */
@@ -192,7 +222,7 @@ public class MainApplication {
     }
 
     /**
-     * Answer the currentUser
+     * Answer the currentUser.
      *
      * @return the currentUser
      */
@@ -201,7 +231,7 @@ public class MainApplication {
     }
 
     /**
-     * Set the currentUser
+     * Set the currentUser.
      *
      * @param currentUser the user set (User, Translator, Administrator)
      */

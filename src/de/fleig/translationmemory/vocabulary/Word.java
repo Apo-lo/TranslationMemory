@@ -7,6 +7,7 @@ import de.fleig.translationmemory.exception.WordNotFoundException;
 import de.fleig.translationmemory.person.Administrator;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.UUID;
 
 public class Word {
@@ -35,32 +36,33 @@ public class Word {
     /**
      * Create a new word and add it to the all words array list
      */
+    public static void createWord() {
+        Globals.printToConsole("What word would you like to create?");
+        String word = Globals.inputScanner.nextLine();
+
+        if (doesWordExists(word)) {
+            wordAlreadyExistsOutput(word);
+        } else {
+            createWord(word);
+        }
+    }
+
+    /**
+     * Create a new word and add it to the all words array list
+     */
     public static void createWord(String wordToCreate) {
-        String word;
 
         if (doesWordExists(wordToCreate)) {
             wordAlreadyExistsOutput(wordToCreate);
             return;
         }
 
-        if (wordToCreate.isEmpty()) {
-            Globals.printToConsole("What word would you like to create?");
-            word = Globals.inputScanner.nextLine();
-        } else {
-            word = wordToCreate;
-        }
-
-        if (doesWordExists(word)) {
-            wordAlreadyExistsOutput(word);
-            return;
-        }
-
         Globals.printToConsole("In which Language is the word?");
         String input = Globals.inputScanner.nextLine();
 
-        if(Language.doesLanguageExists(input)) {
+        if(Language.doesLanguageExist(input)) {
             try {
-                Word theNewWord = new Word(word, Language.getLanguage(input));
+                Word theNewWord = new Word(wordToCreate, Language.getLanguage(input));
                 ALL_WORDS.add(theNewWord);
                 MainApplication.getCurrentUser().getCreatedWords().add(theNewWord);
                 Globals.printToConsole("Word successfully created");
@@ -190,5 +192,14 @@ public class Word {
      */
     public static int getAllWordsCount() {
         return ALL_WORDS.size();
+    }
+
+    /**
+     * Answer the percentage on how many languages the word is translated
+     *
+     * @return the parentage of the translations of the word compared to all languages
+     */
+    public int percentageTranslated() {
+        return ALL_TRANSLATIONS_OF_WORD.size() / Language.ALL_LANGUAGES.size() * 100;
     }
 }

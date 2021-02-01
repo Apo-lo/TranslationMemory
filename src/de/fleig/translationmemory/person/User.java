@@ -6,7 +6,6 @@ import de.fleig.translationmemory.vocabulary.Word;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class User {
@@ -84,15 +83,14 @@ public class User {
     }
 
     /**
-     * Check if a email is valid
+     * Check if a email is invalid
      *
      * @param email email to validate
      *
-     * @return if the given email is valid
+     * @return if the given email is invalid
      */
-    protected static boolean isInvalidEmail(String email) { //https://stackoverflow.com/questions/8204680/java-regex-email
-        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(email);
-        return !matcher.find();
+    protected static boolean isInvalidEmail(String email) {
+        return !VALID_EMAIL_ADDRESS_REGEX.matcher(email).find();
     }
 
     /**

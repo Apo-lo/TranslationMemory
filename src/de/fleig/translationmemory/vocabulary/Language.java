@@ -2,6 +2,7 @@ package de.fleig.translationmemory.vocabulary;
 
 import de.fleig.translationmemory.application.Globals;
 import de.fleig.translationmemory.exception.LanguageNotFoundException;
+import de.fleig.translationmemory.person.Translator;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -12,6 +13,8 @@ public class Language {
     private final UUID LANGUAGE_ID;
 
     public static final ArrayList<Language> ALL_LANGUAGES = new ArrayList<>();
+
+    public final ArrayList<Translator> TRANSLATORS_OF_LANGUAGE = new ArrayList<>();
 
     /**
      * Constructor for Language Class.
@@ -64,7 +67,7 @@ public class Language {
      * @param languageNameToCheck the name of teh language to check
      * @return if the the language exists
      */
-    public static boolean doesLanguageExists(String languageNameToCheck) {
+    public static boolean doesLanguageExist(String languageNameToCheck) {
         for(Language eachLanguage : ALL_LANGUAGES) {
             if(eachLanguage.getLANGUAGE_NAME().equals(languageNameToCheck)) {
                 return true;
@@ -92,25 +95,33 @@ public class Language {
     /**
      * Create a new word and add it to the all words array list
      */
-    public static void createLanguage(String languageToCreate) {
-        String language;
+    public static void createLanguage() {
+        Globals.printToConsole("What Language would you like to create? Please type in german.");
+        createLanguage(Globals.inputScanner.nextLine());
+    }
 
-        if (doesLanguageExists(languageToCreate)) {
+    /**
+     * Create a new word and add it to the all words array list
+     */
+    public static void createLanguage(String languageToCreate) {
+
+        while (!isLanguage(languageToCreate)) {
+            Globals.printToConsole("Language does not exist, please try again, or type \"-cancel\" to cancel.");
+            String input = Globals.inputScanner.nextLine();
+            if(input.equals("-cancel")) {
+                return;
+            }
+            languageToCreate = input;
+        }
+        if (doesLanguageExist(languageToCreate)) {
             Globals.printToConsole("Language already exists");
             return;
         }
 
-        if (languageToCreate.isEmpty()) {
-            Globals.printToConsole("What Language would you like to create?");
-            language = Globals.inputScanner.nextLine();
-        } else {
-            language = languageToCreate;
-        }
-
-        if(doesLanguageExists(language)) {
+        if(doesLanguageExist(languageToCreate)) {
             Globals.printToConsole("Language already exists");
         } else {
-            Language theNewLanguage = new Language(language);
+            Language theNewLanguage = new Language(languageToCreate);
             ALL_LANGUAGES.add(theNewLanguage);
             Globals.printToConsole("Language successfully created");
         }

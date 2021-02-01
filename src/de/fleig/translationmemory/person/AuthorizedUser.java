@@ -16,7 +16,7 @@ import java.util.HashMap;
 public class AuthorizedUser extends User {
     private static final String DEFAULT_PASSWORD = "default_password"; // Hardcoded for first sign in.
 
-    private static final HashMap<String, AuthorizedUser> registeredAuthorizedUsers = new HashMap<>();
+    protected static final HashMap<String, AuthorizedUser> registeredAuthorizedUsers = new HashMap<>();
 
     private String password;
 
