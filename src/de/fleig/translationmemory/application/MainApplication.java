@@ -68,8 +68,16 @@ public class MainApplication {
                     break;
                 case "-assign":
                     if (currentUser instanceof Administrator) {
-                        Administrator administrator = (Administrator) MainApplication.getCurrentUser();
+                        Administrator administrator = (Administrator) getCurrentUser();
                         administrator.assignTranslator();
+                    } else {
+                        Globals.printToConsole("Not allowed to perform action!");
+                    }
+                    break;
+                case "-translate":
+                    if (currentUser instanceof Translator) {
+                        Translator translator = (Translator) getCurrentUser();
+                        translator.translateWord();
                     } else {
                         Globals.printToConsole("Not allowed to perform action!");
                     }

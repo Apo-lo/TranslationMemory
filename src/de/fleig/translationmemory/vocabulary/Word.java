@@ -7,7 +7,6 @@ import de.fleig.translationmemory.exception.WordNotFoundException;
 import de.fleig.translationmemory.person.Administrator;
 
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.UUID;
 
 public class Word {

@@ -56,4 +56,8 @@ public class Globals {
     public static Locale[] getAllAvailableLocales() {
         return allAvailableLocales;
     }
+
+    public static String readNextLine() {
+        return inputScanner.nextLine();
+    }
 }

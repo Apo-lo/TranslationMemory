@@ -5,10 +5,11 @@ import de.fleig.translationmemory.exception.LanguageNotFoundException;
 import de.fleig.translationmemory.vocabulary.Language;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class Administrator extends AuthorizedUser {
     protected static final String DEFAULT_ADMINISTRATOR_EMAIL = "admin@admin.com"; // Hardcoded for first sign in.
-    public static final ArrayList<String> LANGUAGES_TO_CREATE = new ArrayList<>(); //TODO Also save
+    public static final HashSet<String> LANGUAGES_TO_CREATE = new HashSet<>(); //TODO Also save
 
     public Administrator (String email, String password) {
         super(email, password);
