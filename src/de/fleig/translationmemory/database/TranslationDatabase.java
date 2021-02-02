@@ -3,7 +3,6 @@ package de.fleig.translationmemory.database;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonReader;
 import de.fleig.translationmemory.application.Globals;
 import de.fleig.translationmemory.person.AuthorizedUser;
 import de.fleig.translationmemory.person.User;
@@ -27,10 +26,10 @@ public class TranslationDatabase {
     public HashMap<String, AuthorizedUser> allAuthorizedUsers = new HashMap<>();
     public HashMap<String, User>allNormalUsers = new HashMap<>();
 
-    public final String wordsFilePath = "words.json";
-    public final String languagesFilePath = "languages.json";
-    public final String authorizedUsersFilePath = "authorizedUsers.json";
-    public final String normalUsersFilePath = "normalUsers.json";
+    public final String WORDS_FILE_PATH = "words.json";
+    public final String LANGUAGE_FILE_PATH = "languages.json";
+    public final String AUTHORIZED_USER_FILE_PATH = "authorizedUsers.json";
+    public final String NORMAL_USER_FILE_PATH = "normalUsers.json";
 
 
     /**
@@ -69,19 +68,19 @@ public class TranslationDatabase {
      */
     public void saveDataToFile() {
         try {
-            FileWriter fileWriter = new FileWriter(wordsFilePath);
+            FileWriter fileWriter = new FileWriter(WORDS_FILE_PATH);
             GSON.toJson(allWords, fileWriter);
             fileWriter.close();
 
-            fileWriter = new FileWriter(languagesFilePath);
+            fileWriter = new FileWriter(LANGUAGE_FILE_PATH);
             GSON.toJson(allLanguages, fileWriter);
             fileWriter.close();
 
-            fileWriter = new FileWriter(authorizedUsersFilePath);
+            fileWriter = new FileWriter(AUTHORIZED_USER_FILE_PATH);
             GSON.toJson(allAuthorizedUsers, fileWriter);
             fileWriter.close();
 
-            fileWriter = new FileWriter(normalUsersFilePath);
+            fileWriter = new FileWriter(NORMAL_USER_FILE_PATH);
             GSON.toJson(allNormalUsers, fileWriter);
             fileWriter.close();
         } catch (IOException e) {
@@ -95,19 +94,19 @@ public class TranslationDatabase {
      */
     public void loadDataFromFile() {
         try { //https://attacomsian.com/blog/gson-read-json-file
-            Reader reader = Files.newBufferedReader(Paths.get(wordsFilePath));
+            Reader reader = Files.newBufferedReader(Paths.get(WORDS_FILE_PATH));
             Word.ALL_WORDS.addAll(GSON.fromJson(reader, new TypeToken<List<Word>>() {}.getType()));
             reader.close();
 
-            reader = Files.newBufferedReader(Paths.get(languagesFilePath));
+            reader = Files.newBufferedReader(Paths.get(LANGUAGE_FILE_PATH));
             Language.ALL_LANGUAGES.addAll(GSON.fromJson(reader, new TypeToken<List<Language>>() {}.getType()));
             reader.close();
 
-            reader = Files.newBufferedReader(Paths.get(authorizedUsersFilePath));
+            reader = Files.newBufferedReader(Paths.get(AUTHORIZED_USER_FILE_PATH));
             AuthorizedUser.REGISTERED_AUTHORIZED_USERS.putAll(GSON.fromJson(reader, new TypeToken<HashMap<String, AuthorizedUser>>() {}.getType()));
             reader.close();
 
-            reader = Files.newBufferedReader(Paths.get(normalUsersFilePath));
+            reader = Files.newBufferedReader(Paths.get(NORMAL_USER_FILE_PATH));
             User.REGISTERED_NORMAL_USERS.putAll(GSON.fromJson(reader, new TypeToken<HashMap<String, User>>() {}.getType()));
             reader.close();
 
