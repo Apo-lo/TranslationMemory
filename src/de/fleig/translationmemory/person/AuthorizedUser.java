@@ -158,7 +158,7 @@ public class AuthorizedUser extends User {
             throw new EncryptionException();
         }
     }
-
+    //TODO en - and decrypt passwords
     /**
      * Try to decrypt the password given as parameter.
      *
