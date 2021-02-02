@@ -96,7 +96,6 @@ public class Translator extends AuthorizedUser {
         Word.ALL_WORDS.add(theTranslatedWord);
         wordToTranslate.ALL_TRANSLATIONS_OF_WORD.add(theTranslatedWord);
         TRANSLATED_WORDS.add(theTranslatedWord);
-        languageOfTranslation.WORDS_OF_LANGUAGE.add(theTranslatedWord);
     }
 
     /**

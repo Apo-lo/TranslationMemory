@@ -61,9 +61,11 @@ public class Word {
 
         if(Language.doesLanguageExist(input)) {
             try {
-                Word theNewWord = new Word(wordToCreate, Language.getLanguage(input));
+                Language languageOfWord = Language.getLanguage(input);
+                Word theNewWord = new Word(wordToCreate, languageOfWord);
                 ALL_WORDS.add(theNewWord);
                 MainApplication.getCurrentUser().getCreatedWords().add(theNewWord);
+
                 Globals.printToConsole("Word successfully created");
             } catch (LanguageNotFoundException ignored) {
                 // Exception is ignored, getLanguage() will only be called if the language is present.

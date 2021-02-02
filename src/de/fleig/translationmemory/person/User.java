@@ -12,8 +12,8 @@ public class User {
 
     protected String email;
 
-    private static final HashMap<String, User> registeredUsers = new HashMap<>(); //TODO save and load
-    private final ArrayList<Word> createdWords = new ArrayList<>(); //TODO save and load
+    public static final HashMap<String, User> REGISTERED_NORMAL_USERS = new HashMap<>(); //TODO save and load
+    private final ArrayList<Word> CREATED_WORDS = new ArrayList<>(); //TODO save and load
 
     protected static final Pattern VALID_EMAIL_ADDRESS_REGEX =
             Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE); //https://stackoverflow.com/questions/8204680/java-regex-email
@@ -43,13 +43,13 @@ public class User {
         }
 
         if (doesUserExist(input)) {
-            theNewOrAlreadyExistingUser = registeredUsers.get(input);
+            theNewOrAlreadyExistingUser = REGISTERED_NORMAL_USERS.get(input);
         } else if (AuthorizedUser.isUserAlreadyRegistered(input) || AuthorizedUser.isDefaultEmail(input)) {
             theNewOrAlreadyExistingUser = tryLoginAsAuthorizedUser(input);
         } else {
             theNewOrAlreadyExistingUser = new User(input);
         }
-        registeredUsers.put(input, theNewOrAlreadyExistingUser);
+        REGISTERED_NORMAL_USERS.put(input, theNewOrAlreadyExistingUser);
         return theNewOrAlreadyExistingUser;
     }
 
@@ -79,7 +79,7 @@ public class User {
      * @return if the user is already registered
      */
     private static boolean doesUserExist(String email) {
-        return registeredUsers.containsKey(email);
+        return REGISTERED_NORMAL_USERS.containsKey(email);
     }
 
     /**
@@ -117,7 +117,7 @@ public class User {
      * @return the created words of the user
      */
     public ArrayList<Word> getCreatedWords() {
-        return createdWords;
+        return CREATED_WORDS;
     }
 
     /**

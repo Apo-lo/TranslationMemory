@@ -15,7 +15,6 @@ public class Language {
 
     public static final ArrayList<Language> ALL_LANGUAGES = new ArrayList<>();
 
-    public final ArrayList<Word> WORDS_OF_LANGUAGE = new ArrayList<>();
     public final ArrayList<Translator> TRANSLATORS_OF_LANGUAGE = new ArrayList<>();
 
     /**

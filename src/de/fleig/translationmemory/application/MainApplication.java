@@ -1,5 +1,7 @@
 package de.fleig.translationmemory.application;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import de.fleig.translationmemory.exception.LoginFailedException;
 import de.fleig.translationmemory.person.Administrator;
 import de.fleig.translationmemory.person.AuthorizedUser;
@@ -43,6 +45,8 @@ public class MainApplication {
                 case "-exit":
                     Globals.printToConsole("Exiting application");
                     Globals.shutDown();
+                    System.exit(0);
+                    break;
                 case "-login":
                     if ((currentUser instanceof AuthorizedUser)) {
                         Globals.printToConsole("Already logged in!");

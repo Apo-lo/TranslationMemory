@@ -16,7 +16,7 @@ import java.util.HashMap;
 public class AuthorizedUser extends User {
     private static final String DEFAULT_PASSWORD = "default_password"; // Hardcoded for first sign in.
 
-    protected static final HashMap<String, AuthorizedUser> registeredAuthorizedUsers = new HashMap<>();
+    public static final HashMap<String, AuthorizedUser> REGISTERED_AUTHORIZED_USERS = new HashMap<>();
 
     private String password;
 
@@ -50,7 +50,7 @@ public class AuthorizedUser extends User {
     public static AuthorizedUser login(String email, String password) throws LoginFailedException {
         AuthorizedUser userToSignIn;
         if(isUserAlreadyRegistered(email)) {
-            userToSignIn = registeredAuthorizedUsers.get(email);
+            userToSignIn = REGISTERED_AUTHORIZED_USERS.get(email);
             if (isPasswordValidForUser(userToSignIn, password)) {
                 return userToSignIn;
             } else {
@@ -62,7 +62,7 @@ public class AuthorizedUser extends User {
             } else {
                 userToSignIn = Translator.createTranslator();
             }
-            registeredAuthorizedUsers.put(userToSignIn.getEmail(), userToSignIn);
+            REGISTERED_AUTHORIZED_USERS.put(userToSignIn.getEmail(), userToSignIn);
             return userToSignIn;
         }
         throw new LoginFailedException();
@@ -110,14 +110,14 @@ public class AuthorizedUser extends User {
     }
 
     /**
-     * Loop over the registeredUsers
+     * Loop over the REGISTERED_NORMAL_USERS
      * and return if a email of a user equal the email of the login request.
      *
      * @param emailOfLoginRequest the email of the login request
      * @return if there is a registered user with the given parameter as email
      */
     protected static boolean isUserAlreadyRegistered(String emailOfLoginRequest) {
-        return registeredAuthorizedUsers.containsKey(emailOfLoginRequest);
+        return REGISTERED_AUTHORIZED_USERS.containsKey(emailOfLoginRequest);
     }
 
     private static boolean isPasswordValidForUser(AuthorizedUser userToSignIn, String passwordOfLoginRequest) {

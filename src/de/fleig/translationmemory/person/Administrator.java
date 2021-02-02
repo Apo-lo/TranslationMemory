@@ -45,7 +45,7 @@ public class Administrator extends AuthorizedUser {
                 return;
             }
         }
-        if(!(AuthorizedUser.registeredAuthorizedUsers.get(input) instanceof  Translator)) {
+        if(!(AuthorizedUser.REGISTERED_AUTHORIZED_USERS.get(input) instanceof  Translator)) {
             Globals.printToConsole("User is not a translator, do you want to try again (yes/no)");
             if(Globals.readNextLine().equals("yes")) {
                 assignTranslator();
@@ -53,7 +53,7 @@ public class Administrator extends AuthorizedUser {
             }
         }
 
-        Translator translatorToAssign = (Translator) AuthorizedUser.registeredAuthorizedUsers.get(input);
+        Translator translatorToAssign = (Translator) AuthorizedUser.REGISTERED_AUTHORIZED_USERS.get(input);
 
         Globals.printToConsole("To what language should the translator be assigned?");
         String language = Globals.inputScanner.nextLine();
