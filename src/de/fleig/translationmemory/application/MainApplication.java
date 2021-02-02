@@ -21,12 +21,16 @@ public class MainApplication {
         Globals.startUp();
         mainApplication();
     }
+
+    /**
+     * The main program loop
+     */
     public void mainApplication() {
         String input;
         boolean programRunning = true;
 
         setCurrentUser(loginAsStandardUserOrAuthorizedUserIfEmailIsSet());
-        printWelcomeMessageForStandardUser();
+        printWelcomeMessage();
 
         do {
             input = Globals.inputScanner.nextLine();
@@ -73,6 +77,16 @@ public class MainApplication {
                     } else {
                         Globals.printToConsole("Not allowed to perform action!");
                     }
+                    break;
+                case "-translated -words":
+                    if (currentUser instanceof Translator) {
+                        Globals.printToConsole("You translated " + ((Translator) currentUser).getTranslatedWordCount() + " words.");
+                    } else {
+                        Globals.printToConsole("Not allowed to perform action!");
+                    }
+                    break;
+                case "-word -count":
+                    Globals.printToConsole("You have created " + currentUser.getCreatedWordsCount() + " words.");
                     break;
                 case "-translate":
                     if (currentUser instanceof Translator) {
@@ -132,6 +146,18 @@ public class MainApplication {
     }
 
     /**
+     * Print the welcome message for the user type
+     */
+    private void printWelcomeMessage() {
+        if (currentUser instanceof Administrator) {
+            printWelcomeMessageForAdministrator();
+        } else if (currentUser instanceof Translator) {
+            printWelcomeMessageForTranslator();
+        } else {
+            printWelcomeMessageForStandardUser();
+        }
+    }
+    /**
      * Print a welcome message after signing in as a administrator.
      */
     private void printWelcomeMessageForStandardUser() {
@@ -143,6 +169,11 @@ public class MainApplication {
      */
     private void printWelcomeMessageForTranslator() {
         Globals.printToConsole("Hello, " + currentUser.getEmail());
+        Globals.printToConsole("Following words need to be translated");
+        Translator currentTranslator = (Translator) currentUser;
+        for (String eachMissingTranslation : currentTranslator.missingTranslations()) {
+            Globals.printToConsole(eachMissingTranslation);
+        }
     }
 
     /**
@@ -150,6 +181,10 @@ public class MainApplication {
      */
     private void printWelcomeMessageForAdministrator() {
         Globals.printToConsole("Hello " + currentUser.getEmail());
+        Globals.printToConsole("Following languages have been requested:");
+        for (String eachRequestedLanguage : Administrator.LANGUAGES_TO_CREATE) {
+            Globals.printToConsole(eachRequestedLanguage);
+        }
     }
 
     /**
@@ -164,6 +199,7 @@ public class MainApplication {
         optionsForUsers.add("-exit                  - exit the application");
         optionsForUsers.add("-search                - search for an Word");
         optionsForUsers.add("-create -word          - create a new word");
+        optionsForUsers.add("-word -count           - show how many words you created");
         optionsForUsers.add("-login                 - sign in as Administrator or Translator");
 
         return optionsForUsers;
@@ -178,6 +214,7 @@ public class MainApplication {
         ArrayList<String> optionsForTranslators = optionsForAuthorizedUsers();
 
         optionsForTranslators.add("-translate           - translate a word");
+        optionsForTranslators.add("-translated -words   - show how many words you translated");
 
         return optionsForTranslators;
     }
@@ -190,8 +227,8 @@ public class MainApplication {
     private ArrayList<String> optionsForAdministrator() {
         ArrayList<String> optionsForAdministrator = optionsForAuthorizedUsers();
 
-        optionsForAdministrator.add("-create -language             - create a language");
-        optionsForAdministrator.add("-assign                       - assign a translator to a language ");
+        optionsForAdministrator.add("-create -language      - create a language");
+        optionsForAdministrator.add("-assign                - assign a translator to a language ");
         return optionsForAdministrator;
     }
 
@@ -203,8 +240,7 @@ public class MainApplication {
     private ArrayList<String> optionsForAuthorizedUsers() {
         ArrayList<String> optionsForAuthorizedUsers = optionsForUsers();
 
-        optionsForAuthorizedUsers.add("-show                - list all translated words");
-        optionsForAuthorizedUsers.add("-logout              - to log out and exit");
+        optionsForAuthorizedUsers.add("-logout                  - to log out and exit");
 
         return optionsForAuthorizedUsers;
     }

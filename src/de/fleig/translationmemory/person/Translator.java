@@ -63,6 +63,8 @@ public class Translator extends AuthorizedUser {
                     Globals.printToConsole(e.getMessage());
                     return;
                 }
+            } else {
+                return;
             }
         }
 
@@ -93,6 +95,8 @@ public class Translator extends AuthorizedUser {
         Word theTranslatedWord = new Word(translation, languageOfTranslation);
         Word.ALL_WORDS.add(theTranslatedWord);
         wordToTranslate.ALL_TRANSLATIONS_OF_WORD.add(theTranslatedWord);
+        TRANSLATED_WORDS.add(theTranslatedWord);
+        languageOfTranslation.WORDS_OF_LANGUAGE.add(theTranslatedWord);
     }
 
     /**
@@ -103,5 +107,33 @@ public class Translator extends AuthorizedUser {
      */
     private boolean isAllowedToTranslateLanguage(Language languageToTranslate) {
         return LANGUAGES_TO_TRANSLATE.contains(languageToTranslate);
+    }
+
+    /**
+     * Answer how many words the translator translated
+     *
+     * @return the number of the translated words
+     */
+    public int getTranslatedWordCount() {
+        return TRANSLATED_WORDS.size();
+    }
+
+    /**
+     * Answer all words and translations that are missing for the translator
+     *
+     * @return an list of strings contains the word and the language that is missing
+     */
+    public ArrayList<String> missingTranslations() {
+        ArrayList<String> missingTranslations = new ArrayList<>();
+
+        for (Word eachWord : Word.ALL_WORDS) {
+            ArrayList<Language> missingTranslationsOfWord = eachWord.missingTranslations();
+            for (Language eachLanguageToTranslate : LANGUAGES_TO_TRANSLATE) {
+                if (missingTranslationsOfWord.contains(eachLanguageToTranslate)) {
+                    missingTranslations.add("Word: " + eachWord.getWORD() + " Language: " + eachLanguageToTranslate.getLANGUAGE_NAME());
+                }
+            }
+        }
+        return missingTranslations;
     }
 }

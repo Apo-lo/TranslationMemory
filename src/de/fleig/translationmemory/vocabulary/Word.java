@@ -201,4 +201,31 @@ public class Word {
     public int percentageTranslated() {
         return ALL_TRANSLATIONS_OF_WORD.size() / Language.ALL_LANGUAGES.size() * 100;
     }
+
+    /**
+     * Answer a list of all languages missing from word
+     *
+     * @return all languages the word is not translated in
+     */
+    public ArrayList<Language> missingTranslations() {
+        ArrayList<Language> missingLanguages = new ArrayList<>();
+        ArrayList<Language> eachLanguageOfTranslationOfWord = new ArrayList<>();
+
+        for (Word eachTranslation : ALL_TRANSLATIONS_OF_WORD) {
+            eachLanguageOfTranslationOfWord.add(eachTranslation.getLANGUAGE_OF_WORD());
+        }
+
+        eachLanguageOfTranslationOfWord.add(getLANGUAGE_OF_WORD());
+
+        if (Language.ALL_LANGUAGES.size() == eachLanguageOfTranslationOfWord.size()) {
+            return missingLanguages;
+        }
+
+        for (Language eachLanguage : Language.ALL_LANGUAGES) {
+            if(!eachLanguageOfTranslationOfWord.contains(eachLanguage)) {
+                missingLanguages.add(eachLanguage);
+            }
+        }
+        return missingLanguages;
+    }
 }

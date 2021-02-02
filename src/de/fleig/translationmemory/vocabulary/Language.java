@@ -2,6 +2,7 @@ package de.fleig.translationmemory.vocabulary;
 
 import de.fleig.translationmemory.application.Globals;
 import de.fleig.translationmemory.exception.LanguageNotFoundException;
+import de.fleig.translationmemory.person.Administrator;
 import de.fleig.translationmemory.person.Translator;
 
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ public class Language {
 
     public static final ArrayList<Language> ALL_LANGUAGES = new ArrayList<>();
 
+    public final ArrayList<Word> WORDS_OF_LANGUAGE = new ArrayList<>();
     public final ArrayList<Translator> TRANSLATORS_OF_LANGUAGE = new ArrayList<>();
 
     /**
@@ -123,6 +125,9 @@ public class Language {
         } else {
             Language theNewLanguage = new Language(languageToCreate);
             ALL_LANGUAGES.add(theNewLanguage);
+            if (Administrator.isRequestedLanguage(languageToCreate)) {
+                Administrator.LANGUAGES_TO_CREATE.remove(languageToCreate);
+            }
             Globals.printToConsole("Language successfully created");
         }
     }

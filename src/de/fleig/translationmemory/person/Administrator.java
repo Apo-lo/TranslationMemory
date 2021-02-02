@@ -38,13 +38,21 @@ public class Administrator extends AuthorizedUser {
         Globals.printToConsole("Email of the translator to assign");
         String input = Globals.inputScanner.nextLine();
 
-        while(!isUserAlreadyRegistered(input)) { //TODO check when user is found if it is a Translator
+        while(!isUserAlreadyRegistered(input)) {
             Globals.printToConsole("No Translator with this email found try again, or typ \"-cancel\" to cancel.");
             input = Globals.inputScanner.nextLine();
             if (input.equals("-cancel")) {
                 return;
             }
         }
+        if(!(AuthorizedUser.registeredAuthorizedUsers.get(input) instanceof  Translator)) {
+            Globals.printToConsole("User is not a translator, do you want to try again (yes/no)");
+            if(Globals.readNextLine().equals("yes")) {
+                assignTranslator();
+                return;
+            }
+        }
+
         Translator translatorToAssign = (Translator) AuthorizedUser.registeredAuthorizedUsers.get(input);
 
         Globals.printToConsole("To what language should the translator be assigned?");
@@ -71,5 +79,15 @@ public class Administrator extends AuthorizedUser {
         } catch (LanguageNotFoundException ignored) {
             // Can be ignored because getLanguage() will only be called if the language already exist.
         }
+    }
+
+    /**
+     * Answer if the language has been requested
+     *
+     * @param languageToCreate the language to check
+     * @return if the language has been requested
+     */
+    public static boolean isRequestedLanguage(String languageToCreate) {
+        return LANGUAGES_TO_CREATE.contains(languageToCreate);
     }
 }
