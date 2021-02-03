@@ -4,7 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import de.fleig.translationmemory.application.Globals;
+import de.fleig.translationmemory.person.Administrator;
 import de.fleig.translationmemory.person.AuthorizedUser;
+import de.fleig.translationmemory.person.Translator;
 import de.fleig.translationmemory.person.User;
 import de.fleig.translationmemory.vocabulary.Language;
 import de.fleig.translationmemory.vocabulary.Word;
@@ -15,6 +17,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TranslationDatabase {
     private static TranslationDatabase instance;
@@ -23,12 +26,14 @@ public class TranslationDatabase {
 
     public ArrayList<Word> allWords = new ArrayList<>();
     public ArrayList<Language> allLanguages = new ArrayList<>();
-    public HashMap<String, AuthorizedUser> allAuthorizedUsers = new HashMap<>();
+    public HashMap<String, Translator> allTranslators = new HashMap<>();
+    public HashMap<String, Administrator> allAdministrators = new HashMap<>();
     public HashMap<String, User>allNormalUsers = new HashMap<>();
 
     public final String WORDS_FILE_PATH = "words.json";
     public final String LANGUAGE_FILE_PATH = "languages.json";
-    public final String AUTHORIZED_USER_FILE_PATH = "authorizedUsers.json";
+    public final String TRANSLATORS_FILE_PATH = "translators.json";
+    public final String ADMINISTRATORS_FILE_PATH = "administrators.json";
     public final String NORMAL_USER_FILE_PATH = "normalUsers.json";
 
 
@@ -59,8 +64,15 @@ public class TranslationDatabase {
     public void setListsToSave(ArrayList<Word> words, ArrayList<Language> languages, HashMap<String, AuthorizedUser> authorizedUsers, HashMap<String, User> normalUsers) {
         allWords = words;
         allLanguages = languages;
-        allAuthorizedUsers = authorizedUsers;
         allNormalUsers = normalUsers;
+
+        for (Map.Entry<String, AuthorizedUser> eachAuthorizedUser: authorizedUsers.entrySet()) {
+            if(eachAuthorizedUser.getValue() instanceof Administrator) {
+                allAdministrators.put(eachAuthorizedUser.getKey(), (Administrator) eachAuthorizedUser.getValue());
+            } else {
+                allTranslators.put(eachAuthorizedUser.getKey(), (Translator) eachAuthorizedUser.getValue());
+            }
+        }
     }
 
     /**
@@ -76,8 +88,12 @@ public class TranslationDatabase {
             GSON.toJson(allLanguages, fileWriter);
             fileWriter.close();
 
-            fileWriter = new FileWriter(AUTHORIZED_USER_FILE_PATH);
-            GSON.toJson(allAuthorizedUsers, fileWriter);
+            fileWriter = new FileWriter(ADMINISTRATORS_FILE_PATH);
+            GSON.toJson(allAdministrators, fileWriter);
+            fileWriter.close();
+
+            fileWriter = new FileWriter(TRANSLATORS_FILE_PATH);
+            GSON.toJson(allTranslators, fileWriter);
             fileWriter.close();
 
             fileWriter = new FileWriter(NORMAL_USER_FILE_PATH);
@@ -102,8 +118,12 @@ public class TranslationDatabase {
             Language.ALL_LANGUAGES.addAll(GSON.fromJson(reader, new TypeToken<List<Language>>() {}.getType()));
             reader.close();
 
-            reader = Files.newBufferedReader(Paths.get(AUTHORIZED_USER_FILE_PATH));
-            AuthorizedUser.REGISTERED_AUTHORIZED_USERS.putAll(GSON.fromJson(reader, new TypeToken<HashMap<String, AuthorizedUser>>() {}.getType()));
+            reader = Files.newBufferedReader(Paths.get(ADMINISTRATORS_FILE_PATH));
+            AuthorizedUser.REGISTERED_AUTHORIZED_USERS.putAll(GSON.fromJson(reader, new TypeToken<HashMap<String, Administrator>>() {}.getType()));
+            reader.close();
+
+            reader = Files.newBufferedReader(Paths.get(TRANSLATORS_FILE_PATH));
+            AuthorizedUser.REGISTERED_AUTHORIZED_USERS.putAll(GSON.fromJson(reader, new TypeToken<HashMap<String, Translator>>() {}.getType()));
             reader.close();
 
             reader = Files.newBufferedReader(Paths.get(NORMAL_USER_FILE_PATH));

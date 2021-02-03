@@ -3,10 +3,10 @@ package de.fleig.translationmemory.vocabulary;
 import de.fleig.translationmemory.application.Globals;
 import de.fleig.translationmemory.exception.LanguageNotFoundException;
 import de.fleig.translationmemory.person.Administrator;
-import de.fleig.translationmemory.person.Translator;
 
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 
 public class Language {
@@ -15,7 +15,6 @@ public class Language {
 
     public static final ArrayList<Language> ALL_LANGUAGES = new ArrayList<>();
 
-    public final ArrayList<Translator> TRANSLATORS_OF_LANGUAGE = new ArrayList<>();
 
     /**
      * Constructor for Language Class.
@@ -31,7 +30,7 @@ public class Language {
     /**
      * Answer the name of the language.
      *
-     * @return the name if the language
+     * @return the name of the language
      */
     public String getLANGUAGE_NAME() {
         return LANGUAGE_NAME;
@@ -129,5 +128,29 @@ public class Language {
             }
             Globals.printToConsole("Language successfully created");
         }
+    }
+
+    /**
+     * Equals function for Languages
+     *
+     * @param o the language to compare
+     * @return if the objects are equal
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Language language = (Language) o;
+        return Objects.equals(getLANGUAGE_NAME(), language.getLANGUAGE_NAME()) && Objects.equals(getLANGUAGE_ID(), language.getLANGUAGE_ID());
+    }
+
+    /**
+     * Hash function for language
+     *
+     * @return the hash code of the language
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(getLANGUAGE_NAME(), getLANGUAGE_ID());
     }
 }

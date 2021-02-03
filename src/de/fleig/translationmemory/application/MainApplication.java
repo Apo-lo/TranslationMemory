@@ -1,7 +1,5 @@
 package de.fleig.translationmemory.application;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import de.fleig.translationmemory.exception.LoginFailedException;
 import de.fleig.translationmemory.person.Administrator;
 import de.fleig.translationmemory.person.AuthorizedUser;
@@ -92,6 +90,8 @@ public class MainApplication {
                 case "-word -count":
                     Globals.printToConsole("You have created " + currentUser.getCreatedWordsCount() + " words.");
                     break;
+                case "-overall -words":
+                    Globals.printToConsole("There are " + Word.getAllWordsCount() + " words in the database.");
                 case "-translate":
                     if (currentUser instanceof Translator) {
                         Translator translator = (Translator) getCurrentUser();
@@ -204,6 +204,7 @@ public class MainApplication {
         optionsForUsers.add("-search                - search for an Word");
         optionsForUsers.add("-create -word          - create a new word");
         optionsForUsers.add("-word -count           - show how many words you created");
+        optionsForUsers.add("-overall -words        - show how many words are in the databas");
         optionsForUsers.add("-login                 - sign in as Administrator or Translator");
 
         return optionsForUsers;

@@ -48,8 +48,8 @@ public class User {
             theNewOrAlreadyExistingUser = tryLoginAsAuthorizedUser(input);
         } else {
             theNewOrAlreadyExistingUser = new User(input);
+            REGISTERED_NORMAL_USERS.put(input, theNewOrAlreadyExistingUser);
         }
-        REGISTERED_NORMAL_USERS.put(input, theNewOrAlreadyExistingUser);
         return theNewOrAlreadyExistingUser;
     }
 

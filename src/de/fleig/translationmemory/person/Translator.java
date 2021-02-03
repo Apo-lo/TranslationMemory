@@ -93,8 +93,9 @@ public class Translator extends AuthorizedUser {
         String translation = Globals.readNextLine();
 
         Word theTranslatedWord = new Word(translation, languageOfTranslation);
+        theTranslatedWord.ALL_TRANSLATIONS_OF_WORD.add(wordToTranslate.getWORD_ID());
         Word.ALL_WORDS.add(theTranslatedWord);
-        wordToTranslate.ALL_TRANSLATIONS_OF_WORD.add(theTranslatedWord);
+        wordToTranslate.ALL_TRANSLATIONS_OF_WORD.add(theTranslatedWord.getWORD_ID());
         TRANSLATED_WORDS.add(theTranslatedWord);
     }
 
@@ -129,7 +130,7 @@ public class Translator extends AuthorizedUser {
             ArrayList<Language> missingTranslationsOfWord = eachWord.missingTranslations();
             for (Language eachLanguageToTranslate : LANGUAGES_TO_TRANSLATE) {
                 if (missingTranslationsOfWord.contains(eachLanguageToTranslate)) {
-                    missingTranslations.add("Word: " + eachWord.getWORD() + " Language: " + eachLanguageToTranslate.getLANGUAGE_NAME());
+                    missingTranslations.add("Word: " + eachWord.getWORD() + " Language: " + eachLanguageToTranslate.getLANGUAGE_NAME() + "(" + eachWord.percentageTranslated() + ")");
                 }
             }
         }

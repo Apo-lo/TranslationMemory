@@ -73,7 +73,6 @@ public class Administrator extends AuthorizedUser {
         }
         try {
             Language theLanguageToAssign = Language.getLanguage(language);
-            theLanguageToAssign.TRANSLATORS_OF_LANGUAGE.add(translatorToAssign);
             translatorToAssign.LANGUAGES_TO_TRANSLATE.add(theLanguageToAssign);
             Globals.printToConsole("Translator " + translatorToAssign.getEmail() + " successfully assigned to language " + theLanguageToAssign.getLANGUAGE_NAME());
         } catch (LanguageNotFoundException ignored) {

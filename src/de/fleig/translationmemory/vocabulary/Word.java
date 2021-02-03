@@ -16,10 +16,11 @@ public class Word {
     private final Language LANGUAGE_OF_WORD;
 
     public static final ArrayList<Word> ALL_WORDS = new ArrayList<>();
-    public final ArrayList<Word> ALL_TRANSLATIONS_OF_WORD = new ArrayList<>();
+    public final ArrayList<UUID> ALL_TRANSLATIONS_OF_WORD = new ArrayList<>();
 
     /**
      * Constructor for Word Class.
+     * <p></p>
      * Creates a UUID for the Word as well.
      *
      * @param word the word as String
@@ -142,8 +143,12 @@ public class Word {
      */
     public void printWordWithTranslations() {
         Globals.printToConsole(getLANGUAGE_OF_WORD() + " : " + getWORD());
-        for(Word translationOfWord : ALL_TRANSLATIONS_OF_WORD) {
-            Globals.printToConsole(translationOfWord.getLANGUAGE_OF_WORD().getLANGUAGE_NAME() + " : " + translationOfWord.getWORD());
+        try {
+            for (UUID uuidOfTranslation : ALL_TRANSLATIONS_OF_WORD) {
+                Globals.printToConsole(getWordFromUUID(uuidOfTranslation).getLANGUAGE_OF_WORD().getLANGUAGE_NAME() + " : " + getWordFromUUID(uuidOfTranslation).getWORD());
+            }
+        } catch (WordNotFoundException ignored) {
+
         }
     }
 
@@ -201,8 +206,8 @@ public class Word {
      * @return the parentage of the translations of the word compared to all languages
      */
     public int percentageTranslated() {
-        return ALL_TRANSLATIONS_OF_WORD.size() / Language.ALL_LANGUAGES.size() * 100;
-    }
+        return (int) (((double) (ALL_TRANSLATIONS_OF_WORD.size() + 1) / (double) Language.ALL_LANGUAGES.size()) * 100);
+    } // casting fo correct calculation - ugly I know
 
     /**
      * Answer a list of all languages missing from word
@@ -213,8 +218,12 @@ public class Word {
         ArrayList<Language> missingLanguages = new ArrayList<>();
         ArrayList<Language> eachLanguageOfTranslationOfWord = new ArrayList<>();
 
-        for (Word eachTranslation : ALL_TRANSLATIONS_OF_WORD) {
-            eachLanguageOfTranslationOfWord.add(eachTranslation.getLANGUAGE_OF_WORD());
+        try {
+            for (UUID eachUUIDOfTranslation : ALL_TRANSLATIONS_OF_WORD) {
+                eachLanguageOfTranslationOfWord.add(getWordFromUUID(eachUUIDOfTranslation).getLANGUAGE_OF_WORD());
+            }
+        } catch (WordNotFoundException ignored) {
+
         }
 
         eachLanguageOfTranslationOfWord.add(getLANGUAGE_OF_WORD());
@@ -229,5 +238,21 @@ public class Word {
             }
         }
         return missingLanguages;
+    }
+
+    /**
+     * Search for the word with the uuid given as the parameter
+     *
+     * @param uuidToSearch the uuid to search for
+     * @return the word with the uuid
+     * @throws WordNotFoundException if the word is not found
+     */
+    private Word getWordFromUUID(UUID uuidToSearch) throws WordNotFoundException {
+        for (Word eachWord : ALL_WORDS) {
+            if (eachWord.getWORD_ID().equals(uuidToSearch)) {
+                return eachWord;
+            }
+        }
+        throw new WordNotFoundException();
     }
 }
