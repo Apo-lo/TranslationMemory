@@ -11,4 +11,4 @@ Using **github.com/google/gson** to save and load the words/languages/users as j
 
 Executable is in **/out/artifacts/TranslationMemory_jar/**
 
-Application is written in ++Java 15++!
+Application is written in **Java 15**!
