@@ -142,10 +142,11 @@ public class Word {
      * Prints the words and all its available translations
      */
     public void printWordWithTranslations() {
-        Globals.printToConsole(getLANGUAGE_OF_WORD() + " : " + getWORD());
+        Globals.printToConsole(getLANGUAGE_OF_WORD().getLANGUAGE_NAME() + " : " + getWORD());
         try {
             for (UUID uuidOfTranslation : ALL_TRANSLATIONS_OF_WORD) {
-                Globals.printToConsole(getWordFromUUID(uuidOfTranslation).getLANGUAGE_OF_WORD().getLANGUAGE_NAME() + " : " + getWordFromUUID(uuidOfTranslation).getWORD());
+                Globals.printToConsole(getWordFromUUID(uuidOfTranslation).getLANGUAGE_OF_WORD().getLANGUAGE_NAME() +
+                        " : " + getWordFromUUID(uuidOfTranslation).getWORD());
             }
         } catch (WordNotFoundException ignored) {
 
@@ -154,6 +155,7 @@ public class Word {
 
     /**
      * Console output if the word already exist
+     *
      * @param wordThatExists the word to print the translations
      */
     private static void wordAlreadyExistsOutput(String wordThatExists) {
@@ -247,7 +249,7 @@ public class Word {
      * @return the word with the uuid
      * @throws WordNotFoundException if the word is not found
      */
-    private Word getWordFromUUID(UUID uuidToSearch) throws WordNotFoundException {
+    public static Word getWordFromUUID(UUID uuidToSearch) throws WordNotFoundException {
         for (Word eachWord : ALL_WORDS) {
             if (eachWord.getWORD_ID().equals(uuidToSearch)) {
                 return eachWord;
@@ -255,4 +257,21 @@ public class Word {
         }
         throw new WordNotFoundException();
     }
+
+    /**
+     * Add the translation to all other translations of the original word
+     *
+     * @param originalWord the original word
+     * @param translation the translated word
+     */
+    public static void addToAllOtherTranslations(Word originalWord, Word translation) {
+        for(UUID eachTranslation : originalWord.ALL_TRANSLATIONS_OF_WORD) {
+            try {
+                Word.getWordFromUUID(eachTranslation).ALL_TRANSLATIONS_OF_WORD.add(translation.getWORD_ID());
+            } catch (WordNotFoundException ignored) {
+
+            }
+        }
+    }
+
 }

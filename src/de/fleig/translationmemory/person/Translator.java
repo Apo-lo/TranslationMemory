@@ -7,6 +7,7 @@ import de.fleig.translationmemory.vocabulary.Language;
 import de.fleig.translationmemory.vocabulary.Word;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class Translator extends AuthorizedUser {
     protected static final String DEFAULT_TRANSLATOR_EMAIL = "translator@translator.com"; // Hardcoded for first sign in.
@@ -93,10 +94,20 @@ public class Translator extends AuthorizedUser {
         String translation = Globals.readNextLine();
 
         Word theTranslatedWord = new Word(translation, languageOfTranslation);
+
         theTranslatedWord.ALL_TRANSLATIONS_OF_WORD.add(wordToTranslate.getWORD_ID());
+
+        theTranslatedWord.ALL_TRANSLATIONS_OF_WORD.addAll(wordToTranslate.ALL_TRANSLATIONS_OF_WORD);
+
         Word.ALL_WORDS.add(theTranslatedWord);
+
+        Word.addToAllOtherTranslations(wordToTranslate, theTranslatedWord);
+
         wordToTranslate.ALL_TRANSLATIONS_OF_WORD.add(theTranslatedWord.getWORD_ID());
+
         TRANSLATED_WORDS.add(theTranslatedWord);
+
+        Globals.printToConsole(wordToTranslate.getWORD() + " successfully translated");
     }
 
     /**
@@ -125,13 +136,25 @@ public class Translator extends AuthorizedUser {
      */
     public ArrayList<String> missingTranslations() {
         ArrayList<String> missingTranslations = new ArrayList<>();
+        ArrayList<Word> wordAlreadyShown = new ArrayList<>();
 
         for (Word eachWord : Word.ALL_WORDS) {
-            ArrayList<Language> missingTranslationsOfWord = eachWord.missingTranslations();
-            for (Language eachLanguageToTranslate : LANGUAGES_TO_TRANSLATE) {
-                if (missingTranslationsOfWord.contains(eachLanguageToTranslate)) {
-                    missingTranslations.add("Word: " + eachWord.getWORD() + " Language: " + eachLanguageToTranslate.getLANGUAGE_NAME() + "(" + eachWord.percentageTranslated() + ")");
+            if (!wordAlreadyShown.contains(eachWord)) {
+                try {
+                    for (UUID eachTranslationID : eachWord.ALL_TRANSLATIONS_OF_WORD) {
+                        wordAlreadyShown.add(Word.getWordFromUUID(eachTranslationID));
+                    }
+                } catch (WordNotFoundException ignored) {
+
                 }
+
+                ArrayList<Language> missingTranslationsOfWord = eachWord.missingTranslations();
+                for (Language eachLanguageToTranslate : LANGUAGES_TO_TRANSLATE) {
+                    if (missingTranslationsOfWord.contains(eachLanguageToTranslate)) {
+                        missingTranslations.add("Word: " + eachWord.getWORD() + " Language: " + eachLanguageToTranslate.getLANGUAGE_NAME() + "(" + eachWord.percentageTranslated() + ")");
+                    }
+                }
+                wordAlreadyShown.add(eachWord);
             }
         }
         return missingTranslations;

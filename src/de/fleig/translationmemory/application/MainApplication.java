@@ -92,6 +92,7 @@ public class MainApplication {
                     break;
                 case "-overall -words":
                     Globals.printToConsole("There are " + Word.getAllWordsCount() + " words in the database.");
+                    break;
                 case "-translate":
                     if (currentUser instanceof Translator) {
                         Translator translator = (Translator) getCurrentUser();
