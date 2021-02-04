@@ -104,7 +104,9 @@ public class MainApplication {
                 case "-logout":
                     if (currentUser instanceof  AuthorizedUser) {
                         Globals.printToConsole("Logging out and exiting application");
-                        programRunning = false;
+                        Globals.shutDown();
+                        System.exit(0);
+                        break;
                     } else {
                         Globals.printToConsole("Not allowed to perform action!");
                     }
